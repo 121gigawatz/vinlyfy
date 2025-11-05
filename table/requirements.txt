@@ -1,0 +1,42 @@
+# ===============
+# Web Frameworks
+# ===============
+
+# API web framwork
+flask==3.0.0
+
+# Handle cross-origin requests from web front end
+flask-cors==4.0.0
+werkzeug==3.0.1
+
+# =================
+# Audio Processing
+# =================
+
+# Array Processing for audio data
+numpy==1.26.2
+
+# Advanced signal processing (filters, etc.)
+scripy==1.11.4
+
+# Audio format conversion
+pydub==0.25.1
+
+# High-quality audio file I/O
+soundfile==0.12.1
+
+# ==============
+# File Handling
+# ==============
+
+python-multipart==0.0.6
+
+# ========
+# Utilies
+# ========
+python-dotenv==1.0.0
+
+# ==================
+# Production Server
+# ==================
+gunicorn==21.2.0
