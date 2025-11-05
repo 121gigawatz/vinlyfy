@@ -28,6 +28,18 @@ class Config:
 
     # Vinyl Effect Presets
     PRESETS = {
+        # The A's recommended settings
+        'AAA Recommended': {
+            'frequency_response': True,
+            'surface_noise': True,
+            'noise_intensity': 0.02,
+            'wow_flutter': True,
+            'wow_flutter_intensity': 0.001,
+            'harmonic_distortion': True,
+            'distortion_amount': 0.15,
+            'stereo_reduction': True,
+            'stereo_width': 0.7,
+        },
         'light': {
             'frequency_response': True,
             'surface_noise': True,
