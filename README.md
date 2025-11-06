@@ -33,6 +33,7 @@ vinyl-processor/
 - **Stereo Reduction** - Limited stereo separation like real vinyl
 
 ### Presets
+- **AJW Recommended** - Preset from the vinyl enthusiast herself, AJW ❤️ (Give it a spin!)
 - **Light** - Subtle vinyl character (minimal noise)
 - **Medium** - Classic vinyl sound (default)
 - **Heavy** - Well-worn record feel
