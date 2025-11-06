@@ -369,4 +369,4 @@ Contributions welcome! Please open an issue or PR.
 
 ---
 
-Made with ❤️ for vinyl enthusiasts and audio nerds everywhere.
+Made with ❤️ for AJW and other vinyl enthusiasts everywhere!
