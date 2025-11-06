@@ -130,5 +130,5 @@ def parse_boolean(value) -> bool:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        return value.lower() in ('true', '1','yes', 'on')
+        return value.lower() in ('true', '1','yes', 'no')
     return bool(value)
