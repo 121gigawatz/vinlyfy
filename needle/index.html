@@ -51,12 +51,32 @@
   <!-- Main Content -->
   <main class="container" style="padding-bottom: var(--space-3xl);">
     
+    <!-- Hero Section -->
+    <section class="hero animate-fadeIn">
+      <div class="hero-content">
+        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-xl);"></div>
+        <h1 class="hero-title">Give Your Music That Vinyl Soul</h1>
+        <p class="hero-subtitle">Transform digital audio into warm, nostalgic vinyl records</p>
+        <div class="hero-features">
+          <span class="hero-feature">🎧 Authentic Sound</span>
+          <span class="hero-feature">⚡ Fast Processing</span>
+          <span class="hero-feature">📱 Any Device</span>
+          <span class="hero-feature">🎵 Multiple Formats</span>
+        </div>
+      </div>
+    </section>
+    
     <!-- Upload Section -->
     <section class="section animate-slideUp">
-      <div class="card">
+      <div class="card card-glow gradient-border glow-on-hover">
         <div class="card-header">
-          <h2 class="card-title">1. Upload Your Audio</h2>
-          <p class="card-subtitle">Select an audio file to vinylfy</p>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <span class="step-indicator">1</span>
+            <div>
+              <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
+              <p class="card-subtitle">Select an audio file to vinylfy</p>
+            </div>
+          </div>
         </div>
         
         <div class="card-body">
@@ -88,10 +108,15 @@
 
     <!-- Settings Section -->
     <section class="section animate-slideUp" style="animation-delay: 0.1s;">
-      <div class="card">
+      <div class="card card-glow gradient-border glow-on-hover">
         <div class="card-header">
-          <h2 class="card-title">2. Choose Your Vinyl Effect</h2>
-          <p class="card-subtitle">Select a preset or customize your own</p>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <span class="step-indicator">2</span>
+            <div>
+              <h2 class="card-title" style="margin-bottom: var(--space-xs);">Choose Your Vinyl Effect</h2>
+              <p class="card-subtitle">Select a preset or customize your own</p>
+            </div>
+          </div>
         </div>
         
         <div class="card-body">
@@ -254,10 +279,15 @@
 
     <!-- Results Section -->
     <section id="resultsSection" class="section hidden animate-slideUp">
-      <div class="card card-elevated">
+      <div class="card card-elevated card-glow gradient-border">
         <div class="card-header">
-          <h2 class="card-title">3. Preview & Download</h2>
-          <p class="card-subtitle">Your vinylified audio is ready!</p>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <span class="step-indicator">3</span>
+            <div>
+              <h2 class="card-title" style="margin-bottom: var(--space-xs);">Preview & Download</h2>
+              <p class="card-subtitle">Your vinylified audio is ready! 🎉</p>
+            </div>
+          </div>
         </div>
         
         <div class="card-body">
@@ -303,29 +333,54 @@
 
     <!-- Info Section -->
     <section class="section animate-slideUp" style="animation-delay: 0.2s;">
-      <div class="card">
+      <div class="card" style="background: linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, rgba(26, 26, 26, 0.8) 100%);">
         <div class="card-header">
-          <h3 class="card-title">About Vinylfy</h3>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div class="card-header-icon">ℹ️</div>
+            <h3 class="card-title" style="margin-bottom: 0;">How It Works</h3>
+          </div>
         </div>
         <div class="card-body">
-          <p>Vinylfy transforms your digital audio into warm, nostalgic vinyl records by simulating authentic vinyl characteristics:</p>
-          <ul style="list-style: disc; padding-left: var(--space-xl); margin-top: var(--space-md);">
-            <li style="margin-bottom: var(--space-sm); color: var(--color-text-secondary);">
-              <strong style="color: var(--color-text-primary);">Surface Noise</strong> - Authentic crackles, pops, and background hiss
-            </li>
-            <li style="margin-bottom: var(--space-sm); color: var(--color-text-secondary);">
-              <strong style="color: var(--color-text-primary);">Frequency Response</strong> - RIAA equalization curve with natural rolloff
-            </li>
-            <li style="margin-bottom: var(--space-sm); color: var(--color-text-secondary);">
-              <strong style="color: var(--color-text-primary);">Wow & Flutter</strong> - Turntable speed variations for organic feel
-            </li>
-            <li style="margin-bottom: var(--space-sm); color: var(--color-text-secondary);">
-              <strong style="color: var(--color-text-primary);">Harmonic Distortion</strong> - Analog warmth through soft clipping
-            </li>
-            <li style="color: var(--color-text-secondary);">
-              <strong style="color: var(--color-text-primary);">Stereo Reduction</strong> - Limited stereo separation like real vinyl
-            </li>
-          </ul>
+          <p style="font-size: var(--font-size-lg); margin-bottom: var(--space-lg); color: var(--color-text-primary);">
+            Vinylfy simulates the authentic characteristics of vinyl records through advanced digital signal processing:
+          </p>
+          <div style="display: grid; gap: var(--space-lg);">
+            <div style="display: flex; gap: var(--space-md); align-items: start;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🔊</div>
+              <div>
+                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Surface Noise</strong>
+                <p style="color: var(--color-text-secondary); margin: 0;">Authentic crackles, pops, and background hiss that give vinyl its character</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-md); align-items: start;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">📉</div>
+              <div>
+                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Frequency Response</strong>
+                <p style="color: var(--color-text-secondary); margin: 0;">RIAA equalization curve with natural high and low frequency rolloff</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-md); align-items: start;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🌊</div>
+              <div>
+                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Wow & Flutter</strong>
+                <p style="color: var(--color-text-secondary); margin: 0;">Subtle pitch variations from turntable speed inconsistencies</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-md); align-items: start;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🔥</div>
+              <div>
+                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Harmonic Distortion</strong>
+                <p style="color: var(--color-text-secondary); margin: 0;">Analog warmth through gentle saturation and soft clipping</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-md); align-items: start;">
+              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🎚️</div>
+              <div>
+                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Stereo Reduction</strong>
+                <p style="color: var(--color-text-secondary); margin: 0;">Limited stereo separation authentic to vinyl records</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -333,10 +388,25 @@
   </main>
 
   <!-- Footer -->
-  <footer class="app-footer text-center" style="padding: var(--space-xl) 0; border-top: 1px solid var(--color-border);">
-    <p class="text-muted" style="font-size: var(--font-size-sm);">
-      Made with ❤️ for vinyl enthusiasts
-    </p>
+  <footer class="app-footer text-center" style="padding: var(--space-2xl) 0; border-top: 1px solid var(--color-border); background: linear-gradient(180deg, transparent 0%, rgba(212, 165, 116, 0.05) 100%);">
+    <div class="container">
+      <div class="vinyl-record" style="width: 60px; height: 60px; margin: 0 auto var(--space-md);"></div>
+      <p style="font-size: var(--font-size-lg); color: var(--color-primary); font-weight: var(--font-weight-medium); margin-bottom: var(--space-sm);">
+        Vinylfy
+      </p>
+      <p class="text-muted" style="font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+        Transform digital audio into warm vinyl records
+      </p>
+      <div style="display: flex; gap: var(--space-lg); justify-content: center; flex-wrap: wrap; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+        <span>🎵 Authentic Sound</span>
+        <span>⚡ Fast Processing</span>
+        <span>🔒 Privacy First</span>
+        <span>📱 PWA Ready</span>
+      </div>
+      <p class="text-muted" style="font-size: var(--font-size-xs); margin-top: var(--space-lg);">
+        Made with ❤️ for vinyl enthusiasts • Files auto-delete after 1 hour
+      </p>
+    </div>
   </footer>
 
   <!-- Scripts -->
