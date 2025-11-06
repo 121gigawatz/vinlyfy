@@ -1,0 +1,463 @@
+/* ========================================
+   MOBILE FIRST - BASE STYLES
+   (Already defined in base.css and components.css)
+   ======================================== */
+
+/* ========================================
+   SMALL DEVICES (640px and up)
+   Larger phones in landscape
+   ======================================== */
+
+@media (min-width: 640px) {
+  html {
+    font-size: 16px;
+  }
+
+  .container {
+    padding: 0 var(--space-lg);
+  }
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 2.25rem;
+  }
+
+  .card {
+    padding: var(--space-2xl);
+  }
+
+  .btn {
+    padding: var(--space-md) var(--space-2xl);
+  }
+
+  .file-upload-label {
+    min-height: 250px;
+  }
+}
+
+/* ========================================
+   MEDIUM DEVICES (768px and up)
+   Tablets
+   ======================================== */
+
+@media (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+
+  .container {
+    padding: 0 var(--space-xl);
+  }
+
+  /* Two-column layouts */
+  .grid-md-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  /* Hide on medium and up */
+  .md-hidden {
+    display: none !important;
+  }
+
+  /* Show only on medium and up */
+  .md-visible {
+    display: block !important;
+  }
+
+  /* Audio player improvements */
+  .audio-player {
+    padding: var(--space-xl);
+  }
+
+  .audio-play-btn {
+    width: 56px;
+    height: 56px;
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Better file upload */
+  .file-upload-label {
+    min-height: 300px;
+    padding: var(--space-2xl);
+  }
+
+  .file-upload-icon {
+    font-size: 4rem;
+  }
+
+  /* Form improvements */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .form-row-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ========================================
+   LARGE DEVICES (1024px and up)
+   Desktops
+   ======================================== */
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px;
+  }
+
+  .container {
+    padding: 0 var(--space-2xl);
+  }
+
+  /* Three-column layouts */
+  .grid-lg-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xl);
+  }
+
+  /* Hide on large and up */
+  .lg-hidden {
+    display: none !important;
+  }
+
+  /* Show only on large and up */
+  .lg-visible {
+    display: block !important;
+  }
+
+  /* Sidebar layouts */
+  .layout-sidebar {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--space-2xl);
+  }
+
+  .layout-sidebar-right {
+    grid-template-columns: 1fr 300px;
+  }
+
+  /* Hover effects (only on devices that support hover) */
+  .card:hover {
+    transform: translateY(-4px);
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  /* Better spacing */
+  .section {
+    padding: var(--space-3xl) 0;
+  }
+
+  /* Larger vinyl record decoration */
+  .vinyl-record {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+/* ========================================
+   EXTRA LARGE DEVICES (1280px and up)
+   Large desktops
+   ======================================== */
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: var(--max-width-xl);
+  }
+
+  /* Four-column layouts */
+  .grid-xl-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-xl);
+  }
+
+  /* Hide on xl and up */
+  .xl-hidden {
+    display: none !important;
+  }
+
+  /* Show only on xl and up */
+  .xl-visible {
+    display: block !important;
+  }
+
+  /* Even larger vinyl record */
+  .vinyl-record {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+/* ========================================
+   TOUCH DEVICES
+   Larger touch targets, no hover effects
+   ======================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .btn {
+    min-height: 44px;
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .toggle-switch {
+    width: 56px;
+    height: 28px;
+  }
+
+  .toggle-switch::after {
+    width: 20px;
+    height: 20px;
+  }
+
+  .toggle-input:checked + .toggle-switch::after {
+    transform: translateX(28px);
+  }
+
+  /* Remove hover effects */
+  .card:hover {
+    transform: none;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: none;
+  }
+
+  /* Better tap feedback */
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  .card:active {
+    transform: scale(0.99);
+  }
+
+  /* Larger range slider thumb for touch */
+  .range-input::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
+
+  .range-input::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ========================================
+   LANDSCAPE ORIENTATION
+   ======================================== */
+
+@media (orientation: landscape) and (max-height: 600px) {
+  /* Reduce vertical spacing on short landscape screens */
+  .section {
+    padding: var(--space-xl) 0;
+  }
+
+  .card {
+    padding: var(--space-lg);
+  }
+
+  h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  h2 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .file-upload-label {
+    min-height: 150px;
+    padding: var(--space-lg);
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  .no-print,
+  .btn,
+  .audio-player,
+  .file-upload {
+    display: none !important;
+  }
+
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+   Respect user preferences
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin,
+  .animate-pulse,
+  .animate-fadeIn,
+  .animate-slideUp {
+    animation: none !important;
+  }
+
+  .vinyl-record.spinning {
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   HIGH CONTRAST MODE
+   For better accessibility
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: #ffffff;
+    --color-text-secondary: #ffffff;
+    --color-bg-secondary: #000000;
+  }
+
+  .btn {
+    border-width: 3px;
+  }
+
+  .card {
+    border-width: 2px;
+  }
+}
+
+/* ========================================
+   DARK MODE PREFERENCE
+   (Our app is already dark by default, but we can add a light mode variant)
+   ======================================== */
+
+@media (prefers-color-scheme: light) {
+  /* Optional: Add light mode support here if desired
+  :root {
+    --color-bg-primary: #ffffff;
+    --color-text-primary: #1a1a1a;
+    ... etc
+  }
+  */
+}
+
+/* ========================================
+   UTILITY RESPONSIVE CLASSES
+   ======================================== */
+
+/* Show/Hide utilities for different breakpoints */
+@media (max-width: 639px) {
+  .sm-hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm-visible {
+    display: block !important;
+  }
+}
+
+/* Responsive text alignment */
+@media (max-width: 767px) {
+  .mobile-center {
+    text-align: center !important;
+  }
+}
+
+/* Responsive flex direction */
+@media (max-width: 767px) {
+  .mobile-flex-col {
+    flex-direction: column !important;
+  }
+}
+
+/* Responsive padding */
+@media (max-width: 767px) {
+  .mobile-p-sm {
+    padding: var(--space-sm) !important;
+  }
+}
+
+/* Full width on mobile */
+@media (max-width: 767px) {
+  .mobile-full {
+    width: 100% !important;
+  }
+}
+
+/* Stack buttons on mobile */
+@media (max-width: 767px) {
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
+}
+
+/* Safe area insets for notched devices (iPhone X, etc) */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .app-header {
+    padding-top: calc(var(--space-md) + env(safe-area-inset-top));
+  }
+
+  .app-footer {
+    padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom));
+  }
+}
