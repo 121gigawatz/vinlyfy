@@ -32,7 +32,7 @@ class Config:
     # Vinyl Effect Presets
     PRESETS = {
         # The A's recommended settings
-        'AAA Recommended': {
+        'AJW Recommended': {
             'frequency_response': True,
             'surface_noise': True,
             'noise_intensity': 0.02,
