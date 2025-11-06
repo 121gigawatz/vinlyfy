@@ -10,12 +10,15 @@ class Config:
 
     # Flask settings
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'vinylfy-secret-key-change-me'
-    DEBUG = os.environ.get('DEBUG_MODE', 'False').lower() == 'true'
-    MAX_FILE_SIZE = int(os.environ.get('MAX_UPLOAD_MB', '10'))
+    DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    MAX_FILE_SIZE = int(os.environ.get('MAX_UPLOAD_MB', '25'))
+    PROCESSED_FILES_TTL_HOURS = int(os.environ.get('FILE_TTL_HOURS', '1'))
 
     # File Upload Settings
-    MAX_CONTENT_LENGTH = MAX_FILE_SIZE * 1024 * 1024 # Default 10MB
+    MAX_CONTENT_LENGTH = MAX_FILE_SIZE * 1024 * 1024 # Default 25MB
     UPLOAD_FOLDER = Path('/tmp/vinylfy/uploads')
+    PROCESSED_FILES_DIR = Path('/tmp/vinyfly/processed')
+    PROCESSED_FILES_TTL_HOURS = 1
     ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg', 'm4a', 'aac'}
 
     # Audio Processing Settings
@@ -116,6 +119,7 @@ class Config:
     def init_app(app):
         """Initialize app config"""
         Config.UPLOAD_FOLDER.mkdir(parents=True, exist_OK=True)
+        Config.PROCESSED_FILES_DIR.mkdir(parents=True, exist_OK=True)
 
 class DevelopmentConfig(Config):
     """Development config"""
@@ -126,3 +130,16 @@ class ProductionConfig(Config):
     """Production Config"""
     DEBUG = False
     TESTING = False
+
+class TestingConfig(Config):
+    """Testing Config"""
+    DEBUG = True
+    TESTING = True
+
+# Configuration directory
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
+}
