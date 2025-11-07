@@ -25,59 +25,66 @@ vinyl-processor/
 
 ## ✨ Features
 
-### Vinyl Effects
+### Audio Processing (Table)
 - **Surface Noise** - Authentic crackles, pops, and background hiss
 - **Frequency Response** - RIAA equalization curve with high/low rolloff
 - **Wow & Flutter** - Turntable speed variations for organic feel
 - **Harmonic Distortion** - Analog warmth through soft clipping
 - **Stereo Reduction** - Limited stereo separation like real vinyl
 
+### User Interface (Needle)
+- 🎨 **Vinyl-themed design** - Warm colors and record player aesthetics
+- 📱 **Fully responsive** - Mobile, tablet, and desktop
+- 👆 **Touch-optimized** - Large touch targets and gestures
+- ♿ **Accessible** - ARIA labels, keyboard navigation
+- 🌙 **Dark mode** - Easy on the eyes
+- 📲 **PWA** - Install as app on any device
+
 ### Presets
-- **AJW Recommneded** - The best settings according to AJW️ ❤️. Give it a spin!
+- **AJW Recommended** - Recommended Settings from our resident vinyl enthusiast, AWJ. Give it a spin!
 - **Light** - Subtle vinyl character (minimal noise)
 - **Medium** - Classic vinyl sound (default)
 - **Heavy** - Well-worn record feel
 - **Vintage** - Old, heavily-played record with lots of character
 - **Custom** - Full control over every parameter
 
-### Two-Step Preview Workflow
-1. **Upload & Process** - Returns a file ID
-2. **Preview** - Stream audio in browser before downloading
-3. **Download** - Get the final processed file
+### Workflow
+1. **Upload** - Drag/drop or select audio file
+2. **Configure** - Choose preset or customize
+3. **Process** - Audio is processed on the table
+4. **Preview** - Stream audio before downloading
+5. **Download** - Save in your preferred format
 
 Files are stored temporarily and auto-expire after 1 hour.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Unified Deployment)
 
-### Prerequisites
-- Docker & Docker Compose
-- (Optional) Python 3.11+ for local development
+### One-Command Setup
 
-### Installation
-
-1. **Clone the repository**
 ```bash
+# 1. Clone the repository
 git clone <repo-url>
-cd vinyl-processor/table
-```
+cd vinylfy
 
-2. **Configure environment**
-```bash
+# 2. Create environment file
 cp .env.example .env
-# Edit .env with your settings
-```
 
-3. **Build and run with Docker**
-```bash
+# 3. Build and run
 docker-compose up --build
+
+# 4. Open your browser
+# http://localhost
 ```
 
-4. **Verify it's running**
-```bash
-curl http://localhost:5000/api/health
-```
+That's it! Both frontend and backend run in a single container.
 
-The table (backend) is now spinning at `http://localhost:5000` 🎵
+### What's Running?
+
+- **Frontend (Needle)**: Served by nginx on port 80
+- **Backend (Table)**: Flask API at `/api/*`
+- **Single Container**: Everything unified for easy deployment
+
+See [SETUP.md](SETUP.md) for detailed configuration and deployment options.
 
 ## 📡 API Endpoints
 
@@ -370,4 +377,4 @@ Contributions welcome! Please open an issue or PR.
 
 ---
 
-Made with ❤️ for AJW and vinyl enthusiasts and audio nerds everywhere.
+Made with ❤️ for AJW, vinyl enthusiasts and audio nerds everywhere.

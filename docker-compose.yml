@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  vinylfy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vinylfy
+    ports:
+      - "${PORT:-80}:80"
+    environment:
+      # Backend config
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+
+      #File upload settings
+      - MAX_UPLOAD_MD=${MAX_UPLOAD_MB:-25}
+
+      # File storage
+      - FILE_TTL_HOURS=${FILE_TTL_HOURS:-1}
+
+      # CORS Settings (not needed since nginx handles it)
+      - CORS_ORIGINS=http://localhost
+    
+    volumes:
+      # Development: mount code for live reload (commment out for production)
+      - ./table/app:/app/table/app
+      - ./needle:/app/needle
+
+      # Persistent stroage for temp files
+      - vinylfy-data:/tmp/vinylfy
+    
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    labels:
+      - "com.vinylfy.description=Vinylfy application"
+      - "com.vinylfy.version-1.0.0"
+
+volumes:
+  vinylfy-data:
+    driver: local
+
+networks:
+  default:
+    name: vinylfy-network
