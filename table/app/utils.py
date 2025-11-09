@@ -114,7 +114,7 @@ def merge_settings(preset_settings: dict, custom_settings: dict) -> dict:
 
     return merged
 
-def sanitize_filename(filename: str, max_length):
+def sanitize_filename(filename: str, max_length: int = 255):
     safe_name = secure_filename(filename)
 
     # ensure filename not too long

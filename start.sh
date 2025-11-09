@@ -10,10 +10,10 @@ mkdir -p /tmp/nginx_client_body /tmp/nginx_proxy /tmp/nginx_fastcgi /tmp/nginx_u
 echo "📀 Starting table (backend)..."
 cd /app/table
 gunicorn --bind 127.0.0.1:5000 \
-    -- workers 4 \
-    -- timeout 120 \
-    -- access-logfile - \
-    -- error-logfile - \
+    --workers 4 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
     app.main:app &
 
 BACKEND_PID=$!

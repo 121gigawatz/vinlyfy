@@ -17,7 +17,7 @@ werkzeug==3.0.1
 numpy==1.26.2
 
 # Advanced signal processing (filters, etc.)
-scripy==1.11.4
+scipy==1.11.4
 
 # Audio format conversion
 pydub==0.25.1

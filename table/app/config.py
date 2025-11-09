@@ -17,7 +17,7 @@ class Config:
     # File Upload Settings
     MAX_CONTENT_LENGTH = MAX_FILE_SIZE * 1024 * 1024 # Default 25MB
     UPLOAD_FOLDER = Path('/tmp/vinylfy/uploads')
-    PROCESSED_FILES_DIR = Path('/tmp/vinyfly/processed')
+    PROCESSED_FILES_DIR = Path('/tmp/vinylfy/processed')
     PROCESSED_FILES_TTL_HOURS = 1
     ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg', 'm4a', 'aac'}
 
@@ -27,7 +27,7 @@ class Config:
     OUTPUT_SAMPLE_WIDTH = 2 # 16-bit audio 
 
     # CORS SETTINGS
-    CORS_ORIGINS =  os.eviron.get('CORS_ORIGINS', '*').split(',')
+    CORS_ORIGINS =  os.environ.get('CORS_ORIGINS', '*').split(',')
 
     # Vinyl Effect Presets
     PRESETS = {
@@ -118,8 +118,8 @@ class Config:
     @staticmethod
     def init_app(app):
         """Initialize app config"""
-        Config.UPLOAD_FOLDER.mkdir(parents=True, exist_OK=True)
-        Config.PROCESSED_FILES_DIR.mkdir(parents=True, exist_OK=True)
+        Config.UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+        Config.PROCESSED_FILES_DIR.mkdir(parents=True, exist_ok=True)
 
 class DevelopmentConfig(Config):
     """Development config"""

@@ -4,9 +4,8 @@
  */
 
 // API Configuration
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5000/api'
-  : '/api'; // Use relative path in production
+// Always use relative path so requests go through nginx proxy
+const API_BASE_URL = '/api';
 
 // API Client Class
 class VinylAPI {

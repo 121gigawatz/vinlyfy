@@ -2,20 +2,22 @@
 # Build complete backend (table) and frontend (needle)
 
 # 1 - Backend Dependencies
-FROM python:3.11-slim as table-builder
+FROM python:3.11-slim
 
 WORKDIR /build
 
 # Install sys dependencies
+# RUN apt-get update && apt-get install -y --no-install-recommends \ ffmpeg \ libsndfile1 \curl \ $$ rm -rf /var/lib/apt/lists/*
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    libsndfile1 \
-    curl \
-    $$ rm -rf /var/lib/apt/lists/*
+ffmpeg \
+libsndfile1 \
+curl \
+&& rm -rf /var/lib/apt/lists/*
+
 
 # Copy backend requirements and install
-COPY table/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY table/requirements.txt /build/
+RUN pip install --no-cache-dir -r /build/requirements.txt
 
 # 2 - Final Image
 
@@ -36,8 +38,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy Python packages from builder
-COPY --from=table-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=table-builder /usr/local/bin /usr/local/bin
+COPY --from=python:3.11-slim /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=python:3.11-slim /usr/local/bin /usr/local/bin
 
 # Copy backend applicaton
 COPY table/app /app/table/app

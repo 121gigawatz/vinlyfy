@@ -98,34 +98,35 @@ class ProcessedFileManager:
 
         Args:
             file_id: Unique file identifier
-        
+
         Returns:
             Dictionary with file metadata and path, or None if not found/expired
         """
-        metadata_path = self.metadata_dir / f"{file_id}"
+        metadata_path = self.metadata_dir / f"{file_id}.json"
 
         if not metadata_path.exists():
-            logger.warning(f"File not foundL {file_id}")
+            logger.warning(f"File not found: {file_id}")
             return None
-        
+
         # Load metadata
         with open(metadata_path, 'r') as f:
             metadata = json.load(f)
-        
+
         # Check if expired
         expires_at = datetime.fromisoformat(metadata['expires_at'])
         if datetime.now() > expires_at:
-            logger.info(f"File exipred: {file_id}")
+            logger.info(f"File expired: {file_id}")
             self.delete_file(file_id)
             return None
-        
+
         # Check if file exists
         filepath = Path(metadata['filepath'])
         if not filepath.exists():
             logger.warning(f"File missing on disk: {file_id}")
             self.delete_file(file_id)
             return None
-        
+
+        return metadata
     def delete_file(self, file_id: str) -> bool:
         """
         Delete a file and its metadata.
