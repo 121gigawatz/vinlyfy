@@ -8,6 +8,7 @@ import logging
 import os
 from .config import config
 from .routes import api
+from . import __version__
 
 def create_app(config_name=None):
     """
@@ -50,7 +51,7 @@ def create_app(config_name=None):
     def index():
         return {
             'service': 'Vinylfy Table',
-            'version': '1.0.0',
+            'version': __version__,
             'description': 'Backend service for applying vinyl record effects to audio',
             'endpoints': {
                 'health': '/api/health',

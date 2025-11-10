@@ -76,7 +76,6 @@ a {
 }
 
 a:hover {
-  color: var(--color-primary-light);
   text-decoration: underline;
 }
 
@@ -171,9 +170,6 @@ input[type="number"] {
   border: 2px solid var(--color-bg-secondary);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
-}
 
 /* Utility Classes */
 .container {

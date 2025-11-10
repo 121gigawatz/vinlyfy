@@ -33,13 +33,18 @@
   <!-- Header -->
   <header class="app-header container" style="padding-top: var(--space-xl); padding-bottom: var(--space-lg);">
     <div class="flex-between mobile-flex-col gap-md">
-      <div class="text-center mobile-center">
-        <h1 style="margin-bottom: var(--space-xs);">
-          <span style="color: var(--color-primary);">🎵 Vinylfy</span>
+      <div>
+        <h1 style="margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm);">
+          <img src="assets/icons/favicon-96x96.png" alt="Vinylfy icon" style="width: 48px; height: 48px;">
+          <span style="color: var(--color-primary);">Vinylfy</span>
         </h1>
-        <p class="text-secondary" style="margin-bottom: 0;">Transform digital audio into warm vinyl records</p>
       </div>
       <div class="flex gap-sm" style="align-items: center;">
+        <div class="theme-toggle-group" style="display: flex; gap: 4px; background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 2px;">
+          <button id="themeLight" class="theme-toggle-btn" data-theme="light" aria-label="Light mode" title="Light mode">☀️</button>
+          <button id="themeDark" class="theme-toggle-btn" data-theme="dark" aria-label="Dark mode" title="Dark mode">🌙</button>
+          <button id="themeAuto" class="theme-toggle-btn active" data-theme="auto" aria-label="Auto mode" title="Auto mode">Auto</button>
+        </div>
         <span id="healthStatus" class="badge badge-secondary">Checking...</span>
         <button id="installBtn" class="btn btn-ghost btn-sm hidden" aria-label="Install app">
           📲 Install
@@ -54,8 +59,8 @@
     <!-- Hero Section -->
     <section class="hero animate-fadeIn">
       <div class="hero-content">
-        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-xl);"></div>
-        <h1 class="hero-title">Give Your Music That Vinyl Soul</h1>
+        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-sm); width: 80px; height: 80px;"></div>
+        <h1 class="hero-title">Give Your Digital Music That Vinyl Sound</h1>
         <p class="hero-subtitle">Transform digital audio into warm, nostalgic vinyl records</p>
         <div class="hero-features">
           <span class="hero-feature">🎧 Authentic Sound</span>
@@ -66,49 +71,100 @@
       </div>
     </section>
     
-    <!-- Upload Section -->
-    <section class="section animate-slideUp">
-      <div class="card card-glow gradient-border glow-on-hover">
-        <div class="card-header">
-          <div style="display: flex; align-items: center; gap: var(--space-md);">
-            <span class="step-indicator">1</span>
-            <div>
-              <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
-              <p class="card-subtitle">Select an audio file to vinylfy</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="card-body">
-          <div class="file-upload">
-            <input 
-              type="file" 
-              id="audioFile" 
-              accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.aac"
-              aria-label="Upload audio file"
-            >
-            <label for="audioFile" class="file-upload-label" id="fileUploadLabel">
-              <div class="file-upload-icon">🎧</div>
-              <div class="file-upload-text">Click or drag audio file here</div>
-              <div class="file-upload-hint">Supports: WAV, MP3, FLAC, OGG, M4A, AAC (Max 25MB)</div>
-            </label>
-          </div>
-          
-          <!-- File Info -->
-          <div id="fileInfo" class="hidden" style="margin-top: var(--space-lg);">
-            <div class="alert alert-success">
-              <strong>File loaded:</strong> <span id="fileName"></span>
-              <br>
-              <strong>Size:</strong> <span id="fileSize"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- Two Column Layout: Steps 1 & 2 + How It Works -->
+    <div class="two-column-layout" style="margin-bottom: var(--space-xl);">
 
-    <!-- Settings Section -->
-    <section class="section animate-slideUp" style="animation-delay: 0.1s;">
-      <div class="card card-glow gradient-border glow-on-hover">
+      <!-- Left Column: Step 1 + How It Works -->
+      <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+
+        <!-- Upload Section (Step 1) -->
+        <section class="section animate-slideUp" style="margin-bottom: 0;">
+          <div class="card card-glow gradient-border">
+            <div class="card-header">
+              <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <span class="step-indicator">1</span>
+                <div>
+                  <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
+                  <p class="card-subtitle">Select an audio file to vinylfy</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="file-upload">
+                <input
+                  type="file"
+                  id="audioFile"
+                  accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.aac"
+                  aria-label="Upload audio file"
+                >
+                <label for="audioFile" class="file-upload-label" id="fileUploadLabel">
+                  <div class="file-upload-icon">🎧</div>
+                  <div class="file-upload-text">Click or drag audio file here</div>
+                  <div class="file-upload-hint">Supports: WAV, MP3, FLAC, OGG, M4A, AAC (Max 25MB)</div>
+                </label>
+              </div>
+
+              <!-- File Info -->
+              <div id="fileInfo" class="hidden" style="margin-top: var(--space-lg);">
+                <div class="alert alert-success">
+                  <strong>File loaded:</strong> <span id="fileName"></span>
+                  <br>
+                  <strong>Size:</strong> <span id="fileSize"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section id="howItWorks" class="section animate-slideUp" style="animation-delay: 0.2s; margin-bottom: 0; margin-top: var(--space-md); transition: margin-top var(--transition-base);">
+          <div class="card" style="height: 100%;">
+            <div class="card-header">
+              <div style="display: flex; align-items: center; gap: var(--space-md);">
+                <div class="card-header-icon">ℹ️</div>
+                <h3 class="card-title" style="margin-bottom: 0;">How It Works</h3>
+              </div>
+            </div>
+            <div class="card-body">
+              <p style="font-size: var(--font-size-xs); margin-bottom: var(--space-xs); color: var(--color-text-secondary);">
+                Authentic vinyl simulation with:
+              </p>
+              <div style="display: grid; gap: 6px;">
+                <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                  <span style="font-size: var(--font-size-sm);">🔊</span>
+                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Surface Noise</span>
+                </div>
+                <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                  <span style="font-size: var(--font-size-sm);">📉</span>
+                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Frequency Response</span>
+                </div>
+                <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                  <span style="font-size: var(--font-size-sm);">🌊</span>
+                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Wow & Flutter</span>
+                </div>
+                <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                  <span style="font-size: var(--font-size-sm);">🔥</span>
+                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Harmonic Distortion</span>
+                </div>
+                <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                  <span style="font-size: var(--font-size-sm);">🎚️</span>
+                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Stereo Reduction</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+      <!-- End Left Column -->
+
+      <!-- Right Column: Step 2 -->
+      <div>
+
+        <!-- Settings Section (Step 2) -->
+        <section class="section animate-slideUp" style="animation-delay: 0.1s; margin-bottom: 0;">
+      <div class="card card-glow gradient-border" style="display: flex; flex-direction: column; height: 100%;">
         <div class="card-header">
           <div style="display: flex; align-items: center; gap: var(--space-md);">
             <span class="step-indicator">2</span>
@@ -118,8 +174,8 @@
             </div>
           </div>
         </div>
-        
-        <div class="card-body">
+
+        <div class="card-body" style="flex: 1;">
           <!-- Preset Selector -->
           <div class="form-row">
             <div class="form-group">
@@ -136,8 +192,8 @@
             <div class="form-group">
               <label for="formatSelector" class="form-label">Output Format</label>
               <select id="formatSelector" class="form-select">
-                <option value="wav" selected>WAV (Highest Quality)</option>
-                <option value="mp3">MP3 (Smaller Size)</option>
+                <option value="wav">WAV (Highest Quality)</option>
+                <option value="mp3" selected>MP3 (Smaller Size)</option>
                 <option value="flac">FLAC (Lossless)</option>
                 <option value="ogg">OGG (Compressed)</option>
               </select>
@@ -145,8 +201,8 @@
           </div>
 
           <!-- Custom Controls -->
-          <div id="customControls" class="hidden" style="margin-top: var(--space-xl); padding-top: var(--space-xl); border-top: 1px solid var(--color-border);">
-            <h3 style="margin-bottom: var(--space-lg); color: var(--color-primary);">Custom Settings</h3>
+          <div id="customControls" style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border);">
+            <h3 style="margin-bottom: var(--space-md); color: var(--color-primary); font-size: var(--font-size-lg);">Custom Settings</h3>
             
             <!-- Frequency Response -->
             <div class="form-group">
@@ -262,11 +318,17 @@
         <!-- Process Button -->
         <div class="card-footer">
           <button id="processBtn" class="btn btn-primary btn-lg btn-full" disabled>
-            🎵 Process Audio
+            Process Audio
           </button>
         </div>
       </div>
     </section>
+
+      </div>
+      <!-- End Right Column -->
+
+    </div>
+    <!-- End Two Column Layout -->
 
     <!-- Processing Indicator -->
     <section id="processingIndicator" class="section hidden animate-fadeIn">
@@ -326,60 +388,9 @@
             <button id="downloadBtn" class="btn btn-primary btn-lg">
               ⬇ Download
             </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Info Section -->
-    <section class="section animate-slideUp" style="animation-delay: 0.2s;">
-      <div class="card" style="background: linear-gradient(135deg, rgba(212, 165, 116, 0.05) 0%, rgba(26, 26, 26, 0.8) 100%);">
-        <div class="card-header">
-          <div style="display: flex; align-items: center; gap: var(--space-md);">
-            <div class="card-header-icon">ℹ️</div>
-            <h3 class="card-title" style="margin-bottom: 0;">How It Works</h3>
-          </div>
-        </div>
-        <div class="card-body">
-          <p style="font-size: var(--font-size-lg); margin-bottom: var(--space-lg); color: var(--color-text-primary);">
-            Vinylfy simulates the authentic characteristics of vinyl records through advanced digital signal processing:
-          </p>
-          <div style="display: grid; gap: var(--space-lg);">
-            <div style="display: flex; gap: var(--space-md); align-items: start;">
-              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🔊</div>
-              <div>
-                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Surface Noise</strong>
-                <p style="color: var(--color-text-secondary); margin: 0;">Authentic crackles, pops, and background hiss that give vinyl its character</p>
-              </div>
-            </div>
-            <div style="display: flex; gap: var(--space-md); align-items: start;">
-              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">📉</div>
-              <div>
-                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Frequency Response</strong>
-                <p style="color: var(--color-text-secondary); margin: 0;">RIAA equalization curve with natural high and low frequency rolloff</p>
-              </div>
-            </div>
-            <div style="display: flex; gap: var(--space-md); align-items: start;">
-              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🌊</div>
-              <div>
-                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Wow & Flutter</strong>
-                <p style="color: var(--color-text-secondary); margin: 0;">Subtle pitch variations from turntable speed inconsistencies</p>
-              </div>
-            </div>
-            <div style="display: flex; gap: var(--space-md); align-items: start;">
-              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🔥</div>
-              <div>
-                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Harmonic Distortion</strong>
-                <p style="color: var(--color-text-secondary); margin: 0;">Analog warmth through gentle saturation and soft clipping</p>
-              </div>
-            </div>
-            <div style="display: flex; gap: var(--space-md); align-items: start;">
-              <div style="flex-shrink: 0; width: 40px; height: 40px; background: rgba(212, 165, 116, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xl);">🎚️</div>
-              <div>
-                <strong style="color: var(--color-primary); display: block; margin-bottom: var(--space-xs);">Stereo Reduction</strong>
-                <p style="color: var(--color-text-secondary); margin: 0;">Limited stereo separation authentic to vinyl records</p>
-              </div>
-            </div>
+            <button id="discardBtn" class="btn btn-ghost btn-lg" style="border: 1px solid var(--color-error);">
+              🗑️ Discard
+            </button>
           </div>
         </div>
       </div>
@@ -390,7 +401,7 @@
   <!-- Footer -->
   <footer class="app-footer text-center" style="padding: var(--space-2xl) 0; border-top: 1px solid var(--color-border); background: linear-gradient(180deg, transparent 0%, rgba(212, 165, 116, 0.05) 100%);">
     <div class="container">
-      <div class="vinyl-record" style="width: 60px; height: 60px; margin: 0 auto var(--space-md);"></div>
+      <img src="assets/icons/favicon-96x96.png" alt="Vinylfy icon" style="width: 60px; height: 60px; margin: 0 auto var(--space-md); display: block;">
       <p style="font-size: var(--font-size-lg); color: var(--color-primary); font-weight: var(--font-weight-medium); margin-bottom: var(--space-sm);">
         Vinylfy
       </p>

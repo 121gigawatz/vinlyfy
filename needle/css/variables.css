@@ -1,43 +1,12 @@
 :root {
-  /* Colors - Vinyl Theme */
+  /* Colors - Vinyl Theme (static) */
   --color-vinyl-black: #1a1a1a;
   --color-vinyl-dark: #2d2d2d;
   --color-vinyl-groove: #3a3a3a;
   --color-vinyl-label: #d4a574;
   --color-vinyl-gold: #f4c542;
   --color-vinyl-warm: #e8b86d;
-  
-  /* Accent Colors */
-  --color-primary: #d4a574;
-  --color-primary-dark: #b8905f;
-  --color-primary-light: #e8c99a;
-  
-  --color-secondary: #8b6f47;
-  --color-accent: #f4c542;
-  
-  /* Semantic Colors */
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-error: #f44336;
-  --color-info: #2196f3;
-  
-  /* Text Colors */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #b0b0b0;
-  --color-text-muted: #707070;
-  --color-text-inverse: #1a1a1a;
-  
-  /* Background Colors */
-  --color-bg-primary: #1a1a1a;
-  --color-bg-secondary: #2d2d2d;
-  --color-bg-tertiary: #3a3a3a;
-  --color-bg-elevated: #404040;
-  
-  /* Border Colors */
-  --color-border: #404040;
-  --color-border-light: #505050;
-  --color-border-focus: var(--color-primary);
-  
+
   /* Spacing Scale */
   --space-xs: 0.25rem;    /* 4px */
   --space-sm: 0.5rem;     /* 8px */
@@ -46,12 +15,13 @@
   --space-xl: 2rem;       /* 32px */
   --space-2xl: 3rem;      /* 48px */
   --space-3xl: 4rem;      /* 64px */
-  
+
   /* Typography */
-  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                       'Helvetica Neue', Arial, sans-serif;
-  --font-family-display: 'Georgia', 'Times New Roman', serif;
-  
+  --font-family-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                         'Helvetica Neue', Arial, sans-serif;
+
   --font-size-xs: 0.75rem;    /* 12px */
   --font-size-sm: 0.875rem;   /* 14px */
   --font-size-base: 1rem;     /* 16px */
@@ -60,38 +30,38 @@
   --font-size-2xl: 1.5rem;    /* 24px */
   --font-size-3xl: 2rem;      /* 32px */
   --font-size-4xl: 2.5rem;    /* 40px */
-  
+
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   --line-height-tight: 1.2;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.75;
-  
+
   /* Border Radius */
   --radius-sm: 0.25rem;   /* 4px */
   --radius-md: 0.5rem;    /* 8px */
   --radius-lg: 1rem;      /* 16px */
   --radius-xl: 1.5rem;    /* 24px */
   --radius-full: 9999px;  /* Circular */
-  
+
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
-  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
   /* Glow Effects (vinyl theme) */
   --glow-primary: 0 0 20px rgba(212, 165, 116, 0.3);
   --glow-accent: 0 0 30px rgba(244, 197, 66, 0.4);
-  
+
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
   --transition-base: 250ms ease-in-out;
   --transition-slow: 350ms ease-in-out;
-  
+
   /* Z-index Scale */
   --z-dropdown: 1000;
   --z-sticky: 1020;
@@ -100,22 +70,22 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
-  
+
   /* Layout */
   --max-width-sm: 640px;
   --max-width-md: 768px;
   --max-width-lg: 1024px;
   --max-width-xl: 1280px;
   --max-width-2xl: 1536px;
-  
+
   --container-padding: var(--space-md);
-  
+
   /* Breakpoints (for JavaScript usage) */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
-  
+
   /* Custom Properties for Vinyl Aesthetics */
   --vinyl-gradient: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
   --vinyl-groove-pattern: repeating-linear-gradient(
@@ -125,8 +95,99 @@
     rgba(255, 255, 255, 0.02) 2px,
     rgba(255, 255, 255, 0.02) 4px
   );
-  
+
   /* Animation */
   --spin-duration: 3s;
   --pulse-duration: 2s;
+}
+
+/* Dark Mode (default) */
+:root,
+[data-theme="dark"] {
+  /* Accent Colors */
+  --color-primary: #ffffff;
+  --color-primary-dark: #e0e0e0;
+  --color-primary-light: #ffffff;
+
+  --color-secondary: #b0b0b0;
+  --color-accent: #ffffff;
+
+  /* Semantic Colors */
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-error: #f44336;
+  --color-info: #2196f3;
+
+  /* Text Colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #707070;
+  --color-text-inverse: #1a1a1a;
+
+  /* Background Colors */
+  --color-bg-primary: #1a1a1a;
+  --color-bg-secondary: #2d2d2d;
+  --color-bg-tertiary: #3a3a3a;
+  --color-bg-elevated: #404040;
+
+  /* Border Colors */
+  --color-border: #404040;
+  --color-border-light: #505050;
+  --color-border-focus: var(--color-primary);
+
+  /* Dark mode shadows (more visible) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+}
+
+/* Light Mode */
+[data-theme="light"] {
+  /* Accent Colors */
+  --color-primary: #1a1a1a;
+  --color-primary-dark: #2d2d2d;
+  --color-primary-light: #404040;
+
+  --color-secondary: #505050;
+  --color-accent: #1a1a1a;
+
+  /* Semantic Colors */
+  --color-success: #2e7d32;
+  --color-warning: #ef6c00;
+  --color-error: #c62828;
+  --color-info: #1565c0;
+
+  /* Text Colors */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #505050;
+  --color-text-muted: #909090;
+  --color-text-inverse: #ffffff;
+
+  /* Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #e0e0e0;
+  --color-bg-elevated: #ffffff;
+
+  /* Border Colors */
+  --color-border: #e0e0e0;
+  --color-border-light: #c0c0c0;
+  --color-border-focus: var(--color-primary);
+
+  /* Light mode shadows (subtle) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Light mode vinyl gradient */
+  --vinyl-gradient: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+  --vinyl-groove-pattern: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.02) 2px,
+    rgba(0, 0, 0, 0.02) 4px
+  );
 }

@@ -3,6 +3,13 @@
    (Already defined in base.css and components.css)
    ======================================== */
 
+/* Two-column layout - mobile first (stacked) */
+.two-column-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
 /* ========================================
    SMALL DEVICES (640px and up)
    Larger phones in landscape
@@ -34,7 +41,7 @@
   }
 
   .file-upload-label {
-    min-height: 250px;
+    min-height: 140px;
   }
 }
 
@@ -82,12 +89,12 @@
 
   /* Better file upload */
   .file-upload-label {
-    min-height: 300px;
-    padding: var(--space-2xl);
+    min-height: 140px;
+    padding: var(--space-lg);
   }
 
   .file-upload-icon {
-    font-size: 4rem;
+    font-size: var(--font-size-2xl);
   }
 
   /* Form improvements */
@@ -114,6 +121,14 @@
 
   .container {
     padding: 0 var(--space-2xl);
+  }
+
+  /* Two-column layout for steps and info */
+  .two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    align-items: start;
   }
 
   /* Three-column layouts */
@@ -144,14 +159,6 @@
     grid-template-columns: 1fr 300px;
   }
 
-  /* Hover effects (only on devices that support hover) */
-  .card:hover {
-    transform: translateY(-4px);
-  }
-
-  .btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-  }
 
   /* Better spacing */
   .section {
@@ -230,14 +237,6 @@
     transform: translateX(28px);
   }
 
-  /* Remove hover effects */
-  .card:hover {
-    transform: none;
-  }
-
-  .btn:hover:not(:disabled) {
-    transform: none;
-  }
 
   /* Better tap feedback */
   .btn:active:not(:disabled) {
@@ -286,8 +285,8 @@
   }
 
   .file-upload-label {
-    min-height: 150px;
-    padding: var(--space-lg);
+    min-height: 100px;
+    padding: var(--space-md);
   }
 }
 

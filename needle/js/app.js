@@ -20,7 +20,7 @@ class VinylApp {
     this.selectedFile = null;
     this.processedFileId = null;
     this.currentPreset = 'medium';
-    this.outputFormat = 'wav';
+    this.outputFormat = 'mp3';
     this.audioPlayer = null;
     this.presets = {};
     this.customSettings = this.getDefaultCustomSettings();
@@ -46,14 +46,15 @@ class VinylApp {
     this.setupFormatSelector();
     this.setupCustomControls();
     this.setupProcessButton();
-    
+    this.setupThemeToggle();
+
     // Initialize audio player
     this.audioPlayer = new AudioPlayer('audioPlayerContainer');
     this.audioPlayer.hide();
-    
+
     // Setup PWA
     this.setupPWA();
-    
+
     // Load saved preferences
     this.loadPreferences();
     
@@ -69,13 +70,13 @@ class VinylApp {
     try {
       const health = await api.checkHealth();
       if (health.healthy) {
-        healthStatus.textContent = '🟢 Connected';
+        healthStatus.textContent = '🟢 Turntable Spinning';
         healthStatus.className = 'badge badge-success';
       } else {
         throw new Error('API unhealthy');
       }
     } catch (error) {
-      healthStatus.textContent = '🔴 Disconnected';
+      healthStatus.textContent = '🔴 Turntable Stopped';
       healthStatus.className = 'badge badge-error';
       showToast('Cannot connect to server. Please check if the table is running.', 'error', 5000);
     }
@@ -140,6 +141,7 @@ class VinylApp {
     const fileName = document.getElementById('fileName');
     const fileSize = document.getElementById('fileSize');
     const fileInfo = document.getElementById('fileInfo');
+    const howItWorks = document.getElementById('howItWorks');
 
     if (!isValidAudioFile(file)) {
       showToast('Invalid file type. Please select an audio file.', 'error');
@@ -150,9 +152,14 @@ class VinylApp {
     fileName.textContent = file.name;
     fileSize.textContent = formatFileSize(file.size);
     fileInfo.classList.remove('hidden');
-    
+
     document.getElementById('processBtn').disabled = false;
-    
+
+    // Move "How It Works" section down when file is uploaded
+    if (howItWorks) {
+      howItWorks.style.marginTop = 'var(--space-xl)';
+    }
+
     showToast('File loaded successfully!', 'success');
   }
 
@@ -207,6 +214,7 @@ class VinylApp {
     const frequencyResponseToggle = document.getElementById('frequencyResponse');
     frequencyResponseToggle.addEventListener('change', (e) => {
       this.customSettings.frequency_response = e.target.checked;
+      this.switchToCustomPreset();
     });
 
     // Surface noise toggle and intensity
@@ -216,12 +224,14 @@ class VinylApp {
 
     surfaceNoiseToggle.addEventListener('change', (e) => {
       this.customSettings.surface_noise = e.target.checked;
+      this.switchToCustomPreset();
     });
 
     noiseIntensity.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.noise_intensity = value;
       noiseIntensityValue.textContent = value.toFixed(3);
+      this.switchToCustomPreset();
     });
 
     // Wow/Flutter toggle and intensity
@@ -231,12 +241,14 @@ class VinylApp {
 
     wowFlutterToggle.addEventListener('change', (e) => {
       this.customSettings.wow_flutter = e.target.checked;
+      this.switchToCustomPreset();
     });
 
     wowFlutterIntensity.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.wow_flutter_intensity = value;
       wowFlutterValue.textContent = value.toFixed(4);
+      this.switchToCustomPreset();
     });
 
     // Harmonic distortion toggle and amount
@@ -246,12 +258,14 @@ class VinylApp {
 
     harmonicDistortionToggle.addEventListener('change', (e) => {
       this.customSettings.harmonic_distortion = e.target.checked;
+      this.switchToCustomPreset();
     });
 
     distortionAmount.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.distortion_amount = value;
       distortionValue.textContent = value.toFixed(2);
+      this.switchToCustomPreset();
     });
 
     // Stereo reduction toggle and width
@@ -261,26 +275,35 @@ class VinylApp {
 
     stereoReductionToggle.addEventListener('change', (e) => {
       this.customSettings.stereo_reduction = e.target.checked;
+      this.switchToCustomPreset();
     });
 
     stereoWidth.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.stereo_width = value;
       stereoWidthValue.textContent = value.toFixed(2);
+      this.switchToCustomPreset();
     });
   }
 
   /**
+   * Switch to custom preset when user changes any setting
+   */
+  switchToCustomPreset() {
+    const presetSelector = document.getElementById('presetSelector');
+    if (this.currentPreset !== 'custom') {
+      this.currentPreset = 'custom';
+      presetSelector.value = 'custom';
+    }
+  }
+
+  /**
    * Update custom controls visibility
+   * Note: Custom controls are now always visible
    */
   updateCustomControlsVisibility() {
-    const customControls = document.getElementById('customControls');
-    
-    if (this.currentPreset === 'custom') {
-      customControls.classList.remove('hidden');
-    } else {
-      customControls.classList.add('hidden');
-    }
+    // Custom controls are now always shown
+    // This method is kept for backwards compatibility but does nothing
   }
 
   /**
@@ -288,9 +311,54 @@ class VinylApp {
    */
   setupProcessButton() {
     const processBtn = document.getElementById('processBtn');
-    
+
     processBtn.addEventListener('click', () => {
       this.processAudio();
+    });
+  }
+
+  /**
+   * Setup theme toggle
+   */
+  setupThemeToggle() {
+    const themeButtons = document.querySelectorAll('.theme-toggle-btn');
+
+    // Load saved theme or default to 'auto'
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    this.applyTheme(savedTheme);
+
+    // Setup click handlers
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        this.applyTheme(theme);
+        localStorage.setItem('theme', theme);
+      });
+    });
+  }
+
+  /**
+   * Apply theme
+   */
+  applyTheme(theme) {
+    const html = document.documentElement;
+    const themeButtons = document.querySelectorAll('.theme-toggle-btn');
+
+    if (theme === 'auto') {
+      // Use browser/OS preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    } else {
+      html.setAttribute('data-theme', theme);
+    }
+
+    // Update active state
+    themeButtons.forEach(btn => {
+      if (btn.dataset.theme === theme) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
     });
   }
 
@@ -363,13 +431,14 @@ class VinylApp {
     const expiresIn = document.getElementById('expiresIn');
     const previewBtn = document.getElementById('previewBtn');
     const downloadBtn = document.getElementById('downloadBtn');
+    const discardBtn = document.getElementById('discardBtn');
 
     // Update result info
     resultFileName.textContent = result.suggested_filename;
     resultFileSize.textContent = result.file_size_formatted;
     resultPreset.textContent = formatPresetName(result.preset);
     resultFormat.textContent = result.output_format.toUpperCase();
-    
+
     const minutes = Math.floor(result.expires_in_seconds / 60);
     expiresIn.textContent = `${minutes} minutes`;
 
@@ -378,6 +447,9 @@ class VinylApp {
 
     // Setup download button
     downloadBtn.onclick = () => this.downloadAudio(result.file_id);
+
+    // Setup discard button
+    discardBtn.onclick = () => this.discardAudio(result.file_id);
 
     // Show results section
     resultsSection.classList.remove('hidden');
@@ -400,13 +472,13 @@ class VinylApp {
    */
   async downloadAudio(fileId) {
     const downloadBtn = document.getElementById('downloadBtn');
-    
+
     try {
       downloadBtn.disabled = true;
       downloadBtn.innerHTML = '<span class="spinner spinner-sm"></span> Downloading...';
-      
+
       const { blob, filename } = await api.downloadFile(fileId);
-      
+
       // Create download link
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -416,15 +488,66 @@ class VinylApp {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       showToast('Download started! 🎉', 'success');
-      
+
     } catch (error) {
       console.error('Download failed:', error);
       showToast(`Download failed: ${parseErrorMessage(error)}`, 'error');
     } finally {
       downloadBtn.disabled = false;
       downloadBtn.innerHTML = '⬇ Download';
+    }
+  }
+
+  /**
+   * Discard processed audio and reset the UI
+   */
+  async discardAudio(fileId) {
+    // Show warning confirmation
+    const confirmed = confirm(
+      '⚠️ Warning: Are you sure you want to discard this file?\n\n' +
+      'This will delete the processed audio from the server and reset your settings. ' +
+      'This action cannot be undone.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const discardBtn = document.getElementById('discardBtn');
+
+    try {
+      discardBtn.disabled = true;
+      discardBtn.innerHTML = '<span class="spinner spinner-sm"></span> Discarding...';
+
+      // Delete file from server
+      await api.deleteFile(fileId);
+
+      // Stop and hide audio player if playing
+      if (this.audioPlayer) {
+        this.audioPlayer.stop();
+        this.audioPlayer.hide();
+      }
+
+      // Hide results section
+      const resultsSection = document.getElementById('resultsSection');
+      resultsSection.classList.add('hidden');
+
+      // Clear processed file ID
+      this.processedFileId = null;
+
+      // Scroll back to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      showToast('File discarded successfully. You can now try different settings or upload a new file.', 'success');
+
+    } catch (error) {
+      console.error('Discard failed:', error);
+      showToast(`Failed to discard file: ${parseErrorMessage(error)}`, 'error');
+    } finally {
+      discardBtn.disabled = false;
+      discardBtn.innerHTML = '🗑️ Discard';
     }
   }
 

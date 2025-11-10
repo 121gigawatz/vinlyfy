@@ -6,8 +6,8 @@ from .vinyl_processor import VinylProcessor
 from .config import Config
 from .file_manager import ProcessedFileManager
 from .utils import (
-    allowed_file, 
-    create_temp_file, 
+    allowed_file,
+    create_temp_file,
     cleanup_temp_file,
     validate_audio_settings,
     merge_settings,
@@ -15,6 +15,7 @@ from .utils import (
     parse_boolean,
     sanitize_filename
 )
+from . import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'service': 'vinylfy-table',
-        'version': '1.0.0'
+        'version': __version__
     }), 200
 
 
