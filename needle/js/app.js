@@ -24,7 +24,8 @@ class VinylApp {
     this.audioPlayer = null;
     this.presets = {};
     this.customSettings = this.getDefaultCustomSettings();
-    
+    this.isLoadingPreset = false; // Flag to prevent auto-switching to custom during preset load
+
     this.init();
   }
 
@@ -168,9 +169,10 @@ class VinylApp {
    */
   setupPresetSelector() {
     const presetSelector = document.getElementById('presetSelector');
-    
+
     presetSelector.addEventListener('change', (e) => {
       this.currentPreset = e.target.value;
+      this.loadPresetValues(e.target.value);
       this.updateCustomControlsVisibility();
       this.savePreferences();
     });
@@ -183,15 +185,50 @@ class VinylApp {
     const presetSelector = document.getElementById('presetSelector');
     presetSelector.innerHTML = '';
 
+    // Preset descriptions for better UX
+    const presetDescriptions = {
+      'AJW Recommended': 'AJW Recommended - Perfect balance',
+      'light': 'Light - Subtle vinyl character',
+      'medium': 'Medium - Classic vinyl sound',
+      'heavy': 'Heavy - Well-worn record',
+      'vintage': 'Vintage - Old, heavily-played',
+      'custom': 'Custom - Full control'
+    };
+
     Object.keys(this.presets).forEach(preset => {
       const option = document.createElement('option');
       option.value = preset;
-      option.textContent = formatPresetName(preset);
+      option.textContent = presetDescriptions[preset] || formatPresetName(preset);
       presetSelector.appendChild(option);
     });
 
     presetSelector.value = this.currentPreset;
+    this.loadPresetValues(this.currentPreset);
     this.updateCustomControlsVisibility();
+  }
+
+  /**
+   * Load preset values into UI controls
+   */
+  loadPresetValues(presetName) {
+    if (!this.presets[presetName]) {
+      console.warn(`Preset ${presetName} not found`);
+      return;
+    }
+
+    const preset = this.presets[presetName];
+
+    // Set flag to prevent auto-switching to custom
+    this.isLoadingPreset = true;
+
+    // Update custom settings from preset
+    this.customSettings = { ...preset };
+
+    // Update UI controls to reflect preset values
+    this.updateCustomControlValues();
+
+    // Reset flag
+    this.isLoadingPreset = false;
   }
 
   /**
@@ -290,10 +327,16 @@ class VinylApp {
    * Switch to custom preset when user changes any setting
    */
   switchToCustomPreset() {
+    // Don't switch to custom if we're loading a preset
+    if (this.isLoadingPreset) {
+      return;
+    }
+
     const presetSelector = document.getElementById('presetSelector');
     if (this.currentPreset !== 'custom') {
       this.currentPreset = 'custom';
       presetSelector.value = 'custom';
+      this.savePreferences();
     }
   }
 
@@ -707,22 +750,31 @@ class VinylApp {
    */
   loadPreferences() {
     const prefs = storage.get('vinylfy_preferences');
-    
+
     if (prefs) {
       if (prefs.preset) {
         this.currentPreset = prefs.preset;
-        document.getElementById('presetSelector').value = prefs.preset;
+        const presetSelector = document.getElementById('presetSelector');
+        if (presetSelector) {
+          presetSelector.value = prefs.preset;
+        }
+
+        // If it's a custom preset, load saved custom settings
+        // Otherwise, load the preset values from the server
+        if (prefs.preset === 'custom' && prefs.customSettings) {
+          this.customSettings = { ...this.customSettings, ...prefs.customSettings };
+          this.updateCustomControlValues();
+        } else if (this.presets[prefs.preset]) {
+          // Load preset values for non-custom presets
+          this.loadPresetValues(prefs.preset);
+        }
+
         this.updateCustomControlsVisibility();
       }
-      
+
       if (prefs.outputFormat) {
         this.outputFormat = prefs.outputFormat;
         document.getElementById('formatSelector').value = prefs.outputFormat;
-      }
-      
-      if (prefs.customSettings) {
-        this.customSettings = { ...this.customSettings, ...prefs.customSettings };
-        this.updateCustomControlValues();
       }
     }
   }
