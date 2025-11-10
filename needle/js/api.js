@@ -146,10 +146,11 @@ class VinylAPI {
     // Add custom settings if preset is 'custom'
     if (options.preset === 'custom' && options.settings) {
       const settings = options.settings;
-      
+
       formData.append('frequency_response', settings.frequency_response);
       formData.append('surface_noise', settings.surface_noise);
       formData.append('noise_intensity', settings.noise_intensity);
+      formData.append('pop_intensity', settings.pop_intensity);
       formData.append('wow_flutter', settings.wow_flutter);
       formData.append('wow_flutter_intensity', settings.wow_flutter_intensity);
       formData.append('harmonic_distortion', settings.harmonic_distortion);

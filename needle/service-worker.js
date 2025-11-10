@@ -1,5 +1,5 @@
-const CACHE_NAME = 'vinylfy-v1.0.0';
-const RUNTIME_CACHE = 'vinylfy-runtime';
+const CACHE_NAME = 'vinylfy-v1.0.1-beta2.1';
+const RUNTIME_CACHE = 'vinylfy-runtime-beta2.1';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [

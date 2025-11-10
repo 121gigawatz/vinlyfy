@@ -127,8 +127,8 @@
   .two-column-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-md);
-    align-items: start;
+    gap: var(--space-lg);
+    align-items: stretch;
   }
 
   /* Three-column layouts */

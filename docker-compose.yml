@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: vinylfy:beta
+    image: vinylfy:beta-2.1
     container_name: vinylfy
     ports:
       - "${PORT:-8888}:80"

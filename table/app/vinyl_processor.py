@@ -44,24 +44,30 @@ class VinylProcessor:
 
             return samples, audio_segment.frame_rate
 
-    def add_surface_noise(self, audio: np.ndarray, intensity: float = 0.02) -> np.ndarray:
-        # Add vinyl surface noise including crackles
-        # intensity (0.0 to 0.1)
-        logger.debug(f"Adding surface noise with intensity: {intensity}")
+    def add_surface_noise(self, audio: np.ndarray, intensity: float = 0.02, pop_intensity: float = 0.5) -> np.ndarray:
+        """
+        Add vinyl surface noise including crackles and pops.
+
+        Args:
+            audio: Input audio array
+            intensity: Overall noise intensity (0.0 to 0.1)
+            pop_intensity: Pop loudness multiplier (0.0 to 1.0, where 0.5 is balanced)
+        """
+        logger.debug(f"Adding surface noise with intensity: {intensity}, pop_intensity: {pop_intensity}")
 
         # White noise (hiss)
         noise = np.random.normal(0, intensity * 0.5, audio.shape)
 
-        # Add occasional pops (random impulses)
-        pop_probability = 0.0003 # About 13-15 pops per second at 44.1kHz (increased for more noticeable effect)
+        # Add occasional pops (random impulses) - MORE FREQUENT AND LOUDER
+        pop_probability = 0.0006 # Doubled from 0.0003 - About 26-30 pops per second at 44.1kHz
         pops = np.random.random(audio.shape) < pop_probability
-        pop_intensity = intensity * 8 # Pops are louder than hiss (increased from 5 to 8)
-        pop_sound = pops * np.random.uniform(-pop_intensity, pop_intensity, audio.shape)
+        pop_volume = intensity * 12 * pop_intensity # Base louder pops, scaled by pop_intensity parameter
+        pop_sound = pops * np.random.uniform(-pop_volume, pop_volume, audio.shape)
 
-        # Add crackles (short bursts)
-        crackle_probability = 0.00015 # Increased crackle frequency (was 0.00005)
+        # Add crackles (short bursts) - MORE FREQUENT
+        crackle_probability = 0.0003 # Doubled from 0.00015
         crackles = np.random.random(audio.shape) < crackle_probability
-        crackle_sound = crackles * np.random.normal(0, intensity * 3, audio.shape)
+        crackle_sound = crackles * np.random.normal(0, intensity * 4, audio.shape)
 
         return audio + noise + pop_sound + crackle_sound
 
@@ -183,7 +189,8 @@ class VinylProcessor:
 
         if settings.get('surface_noise', True):
             intensity = settings.get('noise_intensity', 0.02)
-            audio = self.add_surface_noise(audio, intensity)
+            pop_intensity = settings.get('pop_intensity', 0.5)
+            audio = self.add_surface_noise(audio, intensity, pop_intensity)
 
         if settings.get('stereo_reduction', True) and len(audio.shape) == 2:
             width = settings.get('stereo_width', 0.7)

@@ -33,14 +33,18 @@ file_manager = ProcessedFileManager(
 def health_check():
     """
     Health check endpoint for monitoring.
-    
+
     Returns:
-        JSON response with status
+        JSON response with status and configuration info
     """
     return jsonify({
         'status': 'healthy',
         'service': 'vinylfy-table',
-        'version': __version__
+        'version': __version__,
+        'config': {
+            'file_ttl_hours': Config.PROCESSED_FILES_TTL_HOURS,
+            'max_upload_mb': Config.MAX_FILE_SIZE
+        }
     }), 200
 
 
@@ -134,6 +138,7 @@ def process_audio():
                 'frequency_response': parse_boolean(request.form.get('frequency_response', True)),
                 'surface_noise': parse_boolean(request.form.get('surface_noise', True)),
                 'noise_intensity': float(request.form.get('noise_intensity', 0.02)),
+                'pop_intensity': float(request.form.get('pop_intensity', 0.6)),
                 'wow_flutter': parse_boolean(request.form.get('wow_flutter', True)),
                 'wow_flutter_intensity': float(request.form.get('wow_flutter_intensity', 0.001)),
                 'harmonic_distortion': parse_boolean(request.form.get('harmonic_distortion', True)),

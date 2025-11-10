@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-  <!-- TO DO: Enable HTTP Basic Login -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -25,14 +24,14 @@
   <title>Vinylfy - Vinyl Record Effect Processor</title>
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="/css/variables.css">
-  <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/variables.css?v=beta2.1">
+  <link rel="stylesheet" href="/css/base.css?v=beta2.1">
+  <link rel="stylesheet" href="/css/components.css?v=beta2.1">
+  <link rel="stylesheet" href="/css/responsive.css?v=beta2.1">
 </head>
 <body>
   <!-- Header -->
-  <header class="app-header container" style="padding-top: var(--space-xl); padding-bottom: var(--space-lg);">
+  <header class="app-header container" style="padding-top: var(--space-xs); padding-bottom: var(--space-lg);">
     <div class="flex-between mobile-flex-col gap-md">
       <div>
         <h1 style="margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm);">
@@ -55,12 +54,12 @@
   </header>
 
   <!-- Main Content -->
-  <main class="container" style="padding-bottom: var(--space-3xl);">
+  <main class="container" style="padding-bottom: var(--space-xs);">
     
     <!-- Hero Section -->
     <section class="hero animate-fadeIn">
       <div class="hero-content">
-        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-sm); width: 80px; height: 80px;"></div>
+        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-xs); width: 80px; height: 80px;"></div>
         <h1 class="hero-title">Give Your Digital Music That Vinyl Sound</h1>
         <p class="hero-subtitle">Transform digital audio into warm, nostalgic vinyl records</p>
         <div class="hero-features">
@@ -72,102 +71,96 @@
       </div>
     </section>
     
-    <!-- Two Column Layout: Steps 1 & 2 + How It Works -->
-    <div class="two-column-layout" style="margin-bottom: var(--space-xl);">
+    <!-- Two Column Layout: Step 1 Left, How It Works Right -->
+    <div class="two-column-layout" style="margin-bottom: 4px;">
 
-      <!-- Left Column: Step 1 + How It Works -->
-      <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
-
-        <!-- Upload Section (Step 1) -->
-        <section class="section animate-slideUp" style="margin-bottom: 0;">
-          <div class="card card-glow gradient-border">
-            <div class="card-header">
-              <div style="display: flex; align-items: center; gap: var(--space-md);">
-                <span class="step-indicator">1</span>
-                <div>
-                  <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
-                  <p class="card-subtitle">Select an audio file to vinylfy</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card-body">
-              <div class="file-upload">
-                <input
-                  type="file"
-                  id="audioFile"
-                  accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.aac"
-                  aria-label="Upload audio file"
-                >
-                <label for="audioFile" class="file-upload-label" id="fileUploadLabel">
-                  <div class="file-upload-icon">🎧</div>
-                  <div class="file-upload-text">Click or drag audio file here</div>
-                  <div class="file-upload-hint">Supports: WAV, MP3, FLAC, OGG, M4A, AAC (Max 25MB)</div>
-                </label>
-              </div>
-
-              <!-- File Info -->
-              <div id="fileInfo" class="hidden" style="margin-top: var(--space-lg);">
-                <div class="alert alert-success">
-                  <strong>File loaded:</strong> <span id="fileName"></span>
-                  <br>
-                  <strong>Size:</strong> <span id="fileSize"></span>
-                </div>
+      <!-- Left Column: Step 1 -->
+      <section class="section animate-slideUp" style="margin-bottom: 0;">
+        <div class="card card-glow gradient-border" style="height: 100%;">
+          <div class="card-header">
+            <div style="display: flex; align-items: center; gap: var(--space-xs);">
+              <span class="step-indicator">1</span>
+              <div>
+                <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
+                <p class="card-subtitle">Select an audio file to vinylfy</p>
               </div>
             </div>
           </div>
-        </section>
 
-        <!-- How It Works Section -->
-        <section id="howItWorks" class="section animate-slideUp" style="animation-delay: 0.2s; margin-bottom: 0; margin-top: var(--space-md); transition: margin-top var(--transition-base);">
-          <div class="card" style="height: 100%;">
-            <div class="card-header">
-              <div style="display: flex; align-items: center; gap: var(--space-md);">
-                <div class="card-header-icon">ℹ️</div>
-                <h3 class="card-title" style="margin-bottom: 0;">How It Works</h3>
-              </div>
+          <div class="card-body">
+            <div class="file-upload">
+              <input
+                type="file"
+                id="audioFile"
+                accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.aac"
+                aria-label="Upload audio file"
+              >
+              <label for="audioFile" class="file-upload-label" id="fileUploadLabel">
+                <div class="file-upload-icon">🎧</div>
+                <div class="file-upload-text">Click or drag audio file here</div>
+                <div class="file-upload-hint">Supports: WAV, MP3, FLAC, OGG, M4A, AAC (Max 25MB)</div>
+              </label>
             </div>
-            <div class="card-body">
-              <p style="font-size: var(--font-size-xs); margin-bottom: var(--space-xs); color: var(--color-text-secondary);">
-                Authentic vinyl simulation with:
-              </p>
-              <div style="display: grid; gap: 6px;">
-                <div style="display: flex; gap: var(--space-xs); align-items: center;">
-                  <span style="font-size: var(--font-size-sm);">🔊</span>
-                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Surface Noise</span>
-                </div>
-                <div style="display: flex; gap: var(--space-xs); align-items: center;">
-                  <span style="font-size: var(--font-size-sm);">📉</span>
-                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Frequency Response</span>
-                </div>
-                <div style="display: flex; gap: var(--space-xs); align-items: center;">
-                  <span style="font-size: var(--font-size-sm);">🌊</span>
-                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Wow & Flutter</span>
-                </div>
-                <div style="display: flex; gap: var(--space-xs); align-items: center;">
-                  <span style="font-size: var(--font-size-sm);">🔥</span>
-                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Harmonic Distortion</span>
-                </div>
-                <div style="display: flex; gap: var(--space-xs); align-items: center;">
-                  <span style="font-size: var(--font-size-sm);">🎚️</span>
-                  <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Stereo Reduction</span>
-                </div>
+
+            <!-- File Info -->
+            <div id="fileInfo" class="hidden" style="margin-top: var(--space-xs);">
+              <div class="alert alert-success">
+                <strong>File loaded:</strong> <span id="fileName"></span>
+                <br>
+                <strong>Size:</strong> <span id="fileSize"></span>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-      </div>
-      <!-- End Left Column -->
+      <!-- Right Column: How It Works -->
+      <section id="howItWorks" class="section animate-slideUp" style="animation-delay: 0.1s; margin-bottom: 0;">
+        <div class="card" style="height: 100%;">
+          <div class="card-header">
+            <div style="display: flex; align-items: center; gap: var(--space-xs);">
+              <div class="card-header-icon">ℹ️</div>
+              <h3 class="card-title" style="margin-bottom: 0;">How It Works</h3>
+            </div>
+          </div>
+          <div class="card-body">
+            <p style="font-size: var(--font-size-xs); margin-bottom: var(--space-xs); color: var(--color-text-secondary);">
+              Authentic vinyl simulation with:
+            </p>
+            <div style="display: grid; gap: 6px;">
+              <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                <span style="font-size: var(--font-size-sm);">🔊</span>
+                <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Surface Noise</span>
+              </div>
+              <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                <span style="font-size: var(--font-size-sm);">📉</span>
+                <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Frequency Response</span>
+              </div>
+              <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                <span style="font-size: var(--font-size-sm);">🌊</span>
+                <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Wow & Flutter</span>
+              </div>
+              <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                <span style="font-size: var(--font-size-sm);">🔥</span>
+                <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Harmonic Distortion</span>
+              </div>
+              <div style="display: flex; gap: var(--space-xs); align-items: center;">
+                <span style="font-size: var(--font-size-sm);">🎚️</span>
+                <span style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Stereo Reduction</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <!-- Right Column: Step 2 -->
-      <div>
+    </div>
+    <!-- End Two Column Layout -->
 
-        <!-- Settings Section (Step 2) -->
-        <section class="section animate-slideUp" style="animation-delay: 0.1s; margin-bottom: 0;">
-      <div class="card card-glow gradient-border" style="display: flex; flex-direction: column; height: 100%;">
+    <!-- Step 2: Full Width with Two Column Controls -->
+    <section class="section animate-slideUp" style="animation-delay: 0.2s; margin-bottom: var(--space-xl); margin-top: 8px;">
+      <div class="card card-glow gradient-border">
         <div class="card-header">
-          <div style="display: flex; align-items: center; gap: var(--space-md);">
+          <div style="display: flex; align-items: center; gap: var(--space-xs);">
             <span class="step-indicator">2</span>
             <div>
               <h2 class="card-title" style="margin-bottom: var(--space-xs);">Choose Your Vinyl Effect</h2>
@@ -176,9 +169,9 @@
           </div>
         </div>
 
-        <div class="card-body" style="flex: 1;">
-          <!-- Preset Selector -->
-          <div class="form-row">
+        <div class="card-body">
+          <!-- Preset and Format Selectors -->
+          <div class="form-row" style="margin-bottom: var(--space-xs);">
             <div class="form-group">
               <label for="presetSelector" class="form-label">Vinyl Preset</label>
               <select id="presetSelector" class="form-select">
@@ -189,7 +182,7 @@
                 <option value="custom">Custom - Full control</option>
               </select>
             </div>
-            
+
             <div class="form-group">
               <label for="formatSelector" class="form-label">Output Format</label>
               <select id="formatSelector" class="form-select">
@@ -201,117 +194,141 @@
             </div>
           </div>
 
-          <!-- Custom Controls -->
-          <div id="customControls" style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border);">
-            <h3 style="margin-bottom: var(--space-md); color: var(--color-primary); font-size: var(--font-size-lg);">Custom Settings</h3>
-            
-            <!-- Frequency Response -->
-            <div class="form-group">
-              <label class="toggle">
-                <input type="checkbox" id="frequencyResponse" class="toggle-input" checked>
-                <span class="toggle-switch"></span>
-                <span>Frequency Response (RIAA curve)</span>
-              </label>
-            </div>
+          <!-- Custom Controls in Two Columns -->
+          <div id="customControls" style="padding-top: var(--space-xs); border-top: 1px solid var(--color-border);">
+            <h3 style="margin-bottom: var(--space-xs); color: var(--color-primary); font-size: var(--font-size-lg);">Custom Settings</h3>
 
-            <!-- Surface Noise -->
-            <div class="form-group">
-              <label class="toggle">
-                <input type="checkbox" id="surfaceNoise" class="toggle-input" checked>
-                <span class="toggle-switch"></span>
-                <span>Surface Noise (crackles & pops)</span>
-              </label>
-            </div>
-            
-            <div class="range-group">
-              <div class="range-label">
-                <span>Noise Intensity</span>
-                <span class="range-value" id="noiseIntensityValue">0.020</span>
-              </div>
-              <input 
-                type="range" 
-                id="noiseIntensity" 
-                class="range-input"
-                min="0" 
-                max="0.1" 
-                step="0.001" 
-                value="0.02"
-              >
-            </div>
+            <div class="two-column-layout">
+              <!-- Left Column Controls -->
+              <div>
+                <!-- Frequency Response -->
+                <div class="form-group">
+                  <label class="toggle">
+                    <input type="checkbox" id="frequencyResponse" class="toggle-input" checked>
+                    <span class="toggle-switch"></span>
+                    <span>Frequency Response (RIAA curve)</span>
+                  </label>
+                </div>
 
-            <!-- Wow & Flutter -->
-            <div class="form-group">
-              <label class="toggle">
-                <input type="checkbox" id="wowFlutter" class="toggle-input" checked>
-                <span class="toggle-switch"></span>
-                <span>Wow & Flutter (pitch variations)</span>
-              </label>
-            </div>
-            
-            <div class="range-group">
-              <div class="range-label">
-                <span>Wow/Flutter Intensity</span>
-                <span class="range-value" id="wowFlutterValue">0.0010</span>
-              </div>
-              <input 
-                type="range" 
-                id="wowFlutterIntensity" 
-                class="range-input"
-                min="0" 
-                max="0.01" 
-                step="0.0001" 
-                value="0.001"
-              >
-            </div>
+                <!-- Surface Noise -->
+                <div class="form-group">
+                  <label class="toggle">
+                    <input type="checkbox" id="surfaceNoise" class="toggle-input" checked>
+                    <span class="toggle-switch"></span>
+                    <span>Surface Noise (crackles & pops)</span>
+                  </label>
+                </div>
 
-            <!-- Harmonic Distortion -->
-            <div class="form-group">
-              <label class="toggle">
-                <input type="checkbox" id="harmonicDistortion" class="toggle-input" checked>
-                <span class="toggle-switch"></span>
-                <span>Harmonic Distortion (analog warmth)</span>
-              </label>
-            </div>
-            
-            <div class="range-group">
-              <div class="range-label">
-                <span>Distortion Amount</span>
-                <span class="range-value" id="distortionValue">0.15</span>
-              </div>
-              <input 
-                type="range" 
-                id="distortionAmount" 
-                class="range-input"
-                min="0" 
-                max="1" 
-                step="0.01" 
-                value="0.15"
-              >
-            </div>
+                <div class="range-group">
+                  <div class="range-label">
+                    <span>Noise Intensity</span>
+                    <span class="range-value" id="noiseIntensityValue">0.020</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="noiseIntensity"
+                    class="range-input"
+                    min="0"
+                    max="0.1"
+                    step="0.001"
+                    value="0.02"
+                  >
+                </div>
 
-            <!-- Stereo Reduction -->
-            <div class="form-group">
-              <label class="toggle">
-                <input type="checkbox" id="stereoReduction" class="toggle-input" checked>
-                <span class="toggle-switch"></span>
-                <span>Stereo Reduction (limited separation)</span>
-              </label>
-            </div>
-            
-            <div class="range-group">
-              <div class="range-label">
-                <span>Stereo Width</span>
-                <span class="range-value" id="stereoWidthValue">0.70</span>
+                <div class="range-group">
+                  <div class="range-label">
+                    <span>Pop Intensity</span>
+                    <span class="range-value" id="popIntensityValue">0.60</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="popIntensity"
+                    class="range-input"
+                    min="0"
+                    max="1.0"
+                    step="0.05"
+                    value="0.6"
+                  >
+                </div>
+
+                <!-- Wow & Flutter -->
+                <div class="form-group">
+                  <label class="toggle">
+                    <input type="checkbox" id="wowFlutter" class="toggle-input" checked>
+                    <span class="toggle-switch"></span>
+                    <span>Wow & Flutter (pitch variations)</span>
+                  </label>
+                </div>
+
+                <div class="range-group">
+                  <div class="range-label">
+                    <span>Wow/Flutter Intensity</span>
+                    <span class="range-value" id="wowFlutterValue">0.0010</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="wowFlutterIntensity"
+                    class="range-input"
+                    min="0"
+                    max="0.01"
+                    step="0.0001"
+                    value="0.001"
+                  >
+                </div>
               </div>
-              <input 
-                type="range" 
-                id="stereoWidth" 
-                class="range-input"
-                min="0" 
-                max="1" 
-                step="0.01" 
-                value="0.7"
-              >
+
+              <!-- Right Column Controls -->
+              <div>
+                <!-- Harmonic Distortion -->
+                <div class="form-group">
+                  <label class="toggle">
+                    <input type="checkbox" id="harmonicDistortion" class="toggle-input" checked>
+                    <span class="toggle-switch"></span>
+                    <span>Harmonic Distortion (analog warmth)</span>
+                  </label>
+                </div>
+
+                <div class="range-group">
+                  <div class="range-label">
+                    <span>Distortion Amount</span>
+                    <span class="range-value" id="distortionValue">0.15</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="distortionAmount"
+                    class="range-input"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.15"
+                  >
+                </div>
+
+                <!-- Stereo Reduction -->
+                <div class="form-group">
+                  <label class="toggle">
+                    <input type="checkbox" id="stereoReduction" class="toggle-input" checked>
+                    <span class="toggle-switch"></span>
+                    <span>Stereo Reduction (limited separation)</span>
+                  </label>
+                </div>
+
+                <div class="range-group">
+                  <div class="range-label">
+                    <span>Stereo Width</span>
+                    <span class="range-value" id="stereoWidthValue">0.70</span>
+                  </div>
+                  <input
+                    type="range"
+                    id="stereoWidth"
+                    class="range-input"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.7"
+                  >
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -325,16 +342,10 @@
       </div>
     </section>
 
-      </div>
-      <!-- End Right Column -->
-
-    </div>
-    <!-- End Two Column Layout -->
-
     <!-- Processing Indicator -->
     <section id="processingIndicator" class="section hidden animate-fadeIn">
       <div class="card card-elevated text-center">
-        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-lg);"></div>
+        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-md);"></div>
         <h3 style="color: var(--color-primary);">Processing Your Audio...</h3>
         <p class="text-secondary">Adding that warm vinyl character 🎶</p>
       </div>
@@ -344,7 +355,7 @@
     <section id="resultsSection" class="section hidden animate-slideUp">
       <div class="card card-elevated card-glow gradient-border">
         <div class="card-header">
-          <div style="display: flex; align-items: center; gap: var(--space-md);">
+          <div style="display: flex; align-items: center; gap: var(--space-xs);">
             <span class="step-indicator">3</span>
             <div>
               <h2 class="card-title" style="margin-bottom: var(--space-xs);">Preview & Download</h2>
@@ -382,7 +393,7 @@
           <div id="audioPlayerContainer" class="hidden"></div>
 
           <!-- Action Buttons -->
-          <div class="btn-group" style="margin-top: var(--space-lg);">
+          <div class="btn-group" style="margin-top: var(--space-xs);">
             <button id="previewBtn" class="btn btn-secondary btn-lg">
               🎧 Preview
             </button>
@@ -400,33 +411,31 @@
   </main>
 
   <!-- Footer -->
-  <footer class="app-footer text-center" style="padding: var(--space-2xl) 0; border-top: 1px solid var(--color-border); background: linear-gradient(180deg, transparent 0%, rgba(212, 165, 116, 0.05) 100%);">
+  <footer class="app-footer text-center" style="padding: var(--space-xs) 0; border-top: 1px solid var(--color-border); background: linear-gradient(180deg, transparent 0%, rgba(212, 165, 116, 0.05) 100%);">
     <div class="container">
       <img src="assets/icons/favicon-96x96.png" alt="Vinylfy icon" style="width: 60px; height: 60px; margin: 0 auto var(--space-md); display: block;">
       <p style="font-size: var(--font-size-lg); color: var(--color-primary); font-weight: var(--font-weight-medium); margin-bottom: var(--space-sm);">
         Vinylfy
       </p> 
-      <p style="font-size: var(--font-size-sm); color: var(--color-primary); font-weight: var(--font-weight-light); margin-bottom: var(--space-sm);">
-        <!-- TO DO: Update version number to match version number in app.js -->
+      <p id="appVersion" style="font-size: var(--font-size-sm); color: var(--color-primary); font-weight: var(--font-weight-light); margin-bottom: var(--space-sm);">
         Version: BETA 2
       </p>
-      <p class="text-muted" style="font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+      <p class="text-muted" style="font-size: var(--font-size-sm); margin-bottom: var(--space-xs);">
         Transform digital audio into warm vinyl records
       </p>
-      <div style="display: flex; gap: var(--space-lg); justify-content: center; flex-wrap: wrap; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+      <div style="display: flex; gap: var(--space-xs); justify-content: center; flex-wrap: wrap; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
         <span>🎵 Authentic Sound</span>
         <span>⚡ Fast Processing</span>
         <span>🔒 Privacy First</span>
         <span>📱 PWA Ready</span>
       </div>
-      <p class="text-muted" style="font-size: var(--font-size-xs); margin-top: var(--space-lg);">
-        <!-- TO DO: update the File auto delete to match env configuration -->
-        Made with ❤️ for AJW and vinyl enthusiasts • Files auto-delete after 1 hour
+      <p class="text-muted" style="font-size: var(--font-size-xs); margin-top: var(--space-xs);">
+        Made with ❤️ for AJW and vinyl enthusiasts • <span id="fileTTL">Files auto-delete after 1 hour</span>
       </p>
     </div>
   </footer>
 
   <!-- Scripts -->
-  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/app.js?v=beta2.1"></script>
 </body>
 </html>

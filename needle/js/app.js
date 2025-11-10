@@ -2,8 +2,11 @@
  * Main Application Logic for Vinylfy
  */
 
-import api from './api.js';
-import AudioPlayer from './audio-player.js';
+// App Configuration
+const APP_VERSION = 'BETA 2.1';
+
+import api from './api.js?v=beta2.1';
+import AudioPlayer from './audio-player.js?v=beta2.1';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -13,7 +16,7 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js';
+} from './utils.js?v=beta2.1';
 
 class VinylApp {
   constructor() {
@@ -25,6 +28,8 @@ class VinylApp {
     this.presets = {};
     this.customSettings = this.getDefaultCustomSettings();
     this.isLoadingPreset = false; // Flag to prevent auto-switching to custom during preset load
+    this.appVersion = APP_VERSION;
+    this.fileTTL = 1; // Default, will be updated from API
 
     this.init();
   }
@@ -34,7 +39,13 @@ class VinylApp {
    */
   async init() {
     console.log('🎵 Vinylfy initializing...');
-    
+
+    // Check for version change and clear old data
+    await this.checkVersionAndCleanup();
+
+    // Clear old caches on startup
+    await this.clearOldCaches();
+
     // Check API health
     await this.checkAPIHealth();
     
@@ -63,16 +74,78 @@ class VinylApp {
   }
 
   /**
+   * Check if app version has changed and cleanup if needed
+   */
+  async checkVersionAndCleanup() {
+    try {
+      const storedVersion = localStorage.getItem('vinylfy_version');
+      const currentVersion = this.appVersion;
+
+      if (storedVersion && storedVersion !== currentVersion) {
+        console.log(`🔄 Version change detected: ${storedVersion} → ${currentVersion}`);
+        console.log('🧹 Clearing all caches and storage...');
+
+        // Clear all caches
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log('✅ All caches cleared');
+        }
+
+        // Unregister all service workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(reg => reg.unregister()));
+          console.log('✅ All service workers unregistered');
+        }
+
+        // Clear localStorage (except the version we're about to set)
+        const itemsToKeep = ['vinylfy_preferences']; // Keep user preferences
+        const allKeys = Object.keys(localStorage);
+        allKeys.forEach(key => {
+          if (key.startsWith('vinylfy_') && !itemsToKeep.includes(key)) {
+            localStorage.removeItem(key);
+          }
+        });
+
+        // Update stored version
+        localStorage.setItem('vinylfy_version', currentVersion);
+        console.log('✅ Version updated, reloading page...');
+
+        // Force a hard reload to get fresh assets
+        window.location.reload(true);
+        return;
+      }
+
+      // Store version if not present
+      if (!storedVersion) {
+        localStorage.setItem('vinylfy_version', currentVersion);
+        console.log(`✅ Version stored: ${currentVersion}`);
+      }
+    } catch (error) {
+      console.warn('Version check failed (non-critical):', error);
+    }
+  }
+
+  /**
    * Check if API is available
    */
   async checkAPIHealth() {
     const healthStatus = document.getElementById('healthStatus');
-    
+
     try {
       const health = await api.checkHealth();
       if (health.healthy) {
         healthStatus.textContent = '🟢 Turntable Spinning';
         healthStatus.className = 'badge badge-success';
+
+        // Update app info from API
+        if (health.config) {
+          this.fileTTL = health.config.file_ttl_hours || 1;
+        }
+
+        // Update footer with version and TTL
+        this.updateFooterInfo();
       } else {
         throw new Error('API unhealthy');
       }
@@ -80,6 +153,102 @@ class VinylApp {
       healthStatus.textContent = '🔴 Turntable Stopped';
       healthStatus.className = 'badge badge-error';
       showToast('Cannot connect to server. Please check if the table is running.', 'error', 5000);
+
+      // Still update footer with defaults
+      this.updateFooterInfo();
+    }
+  }
+
+  /**
+   * Clear old browser caches to ensure fresh assets
+   */
+  async clearOldCaches() {
+    try {
+      const currentVersion = 'beta2.1';
+
+      // Clear browser caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        const oldCaches = cacheNames.filter(name =>
+          !name.includes(currentVersion) && (name.includes('vinylfy') || name.includes('runtime'))
+        );
+
+        if (oldCaches.length > 0) {
+          console.log(`🧹 Found ${oldCaches.length} old cache(s) to clear`);
+          for (const cacheName of oldCaches) {
+            console.log('🧹 Clearing old cache:', cacheName);
+            await caches.delete(cacheName);
+          }
+        }
+      }
+
+      // Unregister old service workers and force update
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+
+        for (const registration of registrations) {
+          // Check if service worker has the current version
+          const hasCurrentVersion = await this.checkServiceWorkerVersion(registration, currentVersion);
+
+          if (!hasCurrentVersion) {
+            console.log('🔄 Unregistering outdated service worker...');
+            await registration.unregister();
+            console.log('✅ Old service worker unregistered');
+          } else if (registration.waiting) {
+            // If there's a new SW waiting, activate it immediately
+            console.log('🔄 Activating waiting service worker...');
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+            // Reload page once new SW is activated
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+              console.log('🔄 Service worker updated, reloading page...');
+              window.location.reload();
+            }, { once: true });
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Cache clearing failed (non-critical):', error);
+    }
+  }
+
+  /**
+   * Check if service worker has current version by checking cache names
+   */
+  async checkServiceWorkerVersion(registration, currentVersion) {
+    try {
+      // Get all cache names
+      const cacheNames = await caches.keys();
+
+      // Check if any cache with the current version exists
+      const hasCurrentCache = cacheNames.some(name =>
+        name.includes(currentVersion) && (name.includes('vinylfy') || name.includes('runtime'))
+      );
+
+      return hasCurrentCache;
+    } catch (error) {
+      console.warn('Version check failed:', error);
+      return false; // Default to unregister if we can't check
+    }
+  }
+
+  /**
+   * Update footer with app version and file TTL info
+   */
+  updateFooterInfo() {
+    // Update version
+    const versionElement = document.getElementById('appVersion');
+    if (versionElement) {
+      versionElement.textContent = `Version: ${this.appVersion}`;
+    }
+
+    // Update TTL message
+    const ttlElement = document.getElementById('fileTTL');
+    if (ttlElement) {
+      const ttlText = this.fileTTL === 1
+        ? '1 hour'
+        : `${this.fileTTL} hours`;
+      ttlElement.textContent = `Files auto-delete after ${ttlText}`;
     }
   }
 
@@ -142,7 +311,6 @@ class VinylApp {
     const fileName = document.getElementById('fileName');
     const fileSize = document.getElementById('fileSize');
     const fileInfo = document.getElementById('fileInfo');
-    const howItWorks = document.getElementById('howItWorks');
 
     if (!isValidAudioFile(file)) {
       showToast('Invalid file type. Please select an audio file.', 'error');
@@ -155,11 +323,6 @@ class VinylApp {
     fileInfo.classList.remove('hidden');
 
     document.getElementById('processBtn').disabled = false;
-
-    // Move "How It Works" section down when file is uploaded
-    if (howItWorks) {
-      howItWorks.style.marginTop = 'var(--space-xl)';
-    }
 
     showToast('File loaded successfully!', 'success');
   }
@@ -268,6 +431,17 @@ class VinylApp {
       const value = parseFloat(e.target.value);
       this.customSettings.noise_intensity = value;
       noiseIntensityValue.textContent = value.toFixed(3);
+      this.switchToCustomPreset();
+    });
+
+    // Pop intensity slider
+    const popIntensity = document.getElementById('popIntensity');
+    const popIntensityValue = document.getElementById('popIntensityValue');
+
+    popIntensity.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      this.customSettings.pop_intensity = value;
+      popIntensityValue.textContent = value.toFixed(2);
       this.switchToCustomPreset();
     });
 
@@ -602,6 +776,7 @@ class VinylApp {
       frequency_response: true,
       surface_noise: true,
       noise_intensity: 0.02,
+      pop_intensity: 0.6,
       wow_flutter: true,
       wow_flutter_intensity: 0.001,
       harmonic_distortion: true,
@@ -787,6 +962,8 @@ class VinylApp {
     document.getElementById('surfaceNoise').checked = this.customSettings.surface_noise;
     document.getElementById('noiseIntensity').value = this.customSettings.noise_intensity;
     document.getElementById('noiseIntensityValue').textContent = this.customSettings.noise_intensity.toFixed(3);
+    document.getElementById('popIntensity').value = this.customSettings.pop_intensity;
+    document.getElementById('popIntensityValue').textContent = this.customSettings.pop_intensity.toFixed(2);
     document.getElementById('wowFlutter').checked = this.customSettings.wow_flutter;
     document.getElementById('wowFlutterIntensity').value = this.customSettings.wow_flutter_intensity;
     document.getElementById('wowFlutterValue').textContent = this.customSettings.wow_flutter_intensity.toFixed(4);
