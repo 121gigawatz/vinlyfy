@@ -1,27 +1,6 @@
 # 🎵 Vinylfy - Vinyl Record Effect Processor
 
-Transform your digital audio into warm, nostalgic vinyl records. Vinylfy applies authentic vinyl characteristics including surface noise, frequency response curves, wow & flutter, and harmonic distortion.
-
-## 🏗️ Architecture
-
-```
-vinyl-processor/
-├── table/              # Backend (The Turntable)
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py              # Flask app initialization
-│   │   ├── routes.py            # API endpoints
-│   │   ├── vinyl_processor.py   # Audio processing engine
-│   │   ├── file_manager.py      # Processed file storage
-│   │   ├── config.py            # Configuration
-│   │   └── utils.py             # Helper functions
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── .env.example
-├── needle/             # Frontend (Coming soon - The Interface)
-└── README.md
-```
+Transform your digital audio into warm, nostalgic vinyl records. Vinylfy applies authentic vinyl characteristics including surface noise, frequency response curves, wow & flutter, pops, and harmonic distortion.
 
 ## ✨ Features
 
@@ -29,16 +8,16 @@ vinyl-processor/
 - **Surface Noise** - Authentic crackles, pops, and background hiss
 - **Frequency Response** - RIAA equalization curve with high/low rolloff
 - **Wow & Flutter** - Turntable speed variations for organic feel
+- **Pop Intensity** - Add the "pops" from the sound of a needle going across the record.
 - **Harmonic Distortion** - Analog warmth through soft clipping
 - **Stereo Reduction** - Limited stereo separation like real vinyl
 
 ### User Interface (Needle)
-- 🎨 **Vinyl-themed design** - Warm colors and record player aesthetics
+- 🎨 **Simple & Clean Design** - Modern UI with simple, clean design. Includes Light and Dark modes, and respects your browser settings.
 - 📱 **Fully responsive** - Mobile, tablet, and desktop
 - 👆 **Touch-optimized** - Large touch targets and gestures
 - ♿ **Accessible** - ARIA labels, keyboard navigation
-- 🌙 **Dark mode** - Easy on the eyes
-- 📲 **PWA** - Install as app on any device
+- 📲 **PWA** - Install as app on any device, including iOS.
 
 ### Presets
 - **AJW Recommended** - Recommended Settings from our resident vinyl enthusiast, AWJ. Give it a spin!
@@ -53,9 +32,10 @@ vinyl-processor/
 2. **Configure** - Choose preset or customize
 3. **Process** - Audio is processed on the table
 4. **Preview** - Stream audio before downloading
-5. **Download** - Save in your preferred format
+5. **Discard** - Want to make more tweaks before downloading, simply discard and try again!
+6. **Download** - Save in your preferred format
 
-Files are stored temporarily and auto-expire after 1 hour.
+Files are stored temporarily and auto-expire after the time configured by the administrator.
 
 ## 🚀 Quick Start (Unified Deployment)
 
@@ -85,103 +65,6 @@ That's it! Both frontend and backend run in a single container.
 - **Single Container**: Everything unified for easy deployment
 
 See [SETUP.md](SETUP.md) for detailed configuration and deployment options.
-
-## 📡 API Endpoints
-
-### Health Check
-```bash
-GET /api/health
-```
-
-### Get Presets
-```bash
-GET /api/presets
-```
-
-### Get Supported Formats
-```bash
-GET /api/formats
-```
-
-### Process Audio (Upload & Convert)
-```bash
-POST /api/process
-Content-Type: multipart/form-data
-
-Parameters:
-  - audio: Audio file (required)
-  - preset: light|medium|heavy|vintage|custom (default: medium)
-  - output_format: wav|mp3|flac|ogg (default: wav)
-  
-For custom preset, add:
-  - frequency_response: true/false
-  - surface_noise: true/false
-  - noise_intensity: 0.0-0.1
-  - wow_flutter: true/false
-  - wow_flutter_intensity: 0.0-0.01
-  - harmonic_distortion: true/false
-  - distortion_amount: 0.0-1.0
-  - stereo_reduction: true/false
-  - stereo_width: 0.0-1.0
-
-Response:
-{
-  "success": true,
-  "file_id": "uuid-here",
-  "original_filename": "song.mp3",
-  "suggested_filename": "song_vinylfy.wav",
-  "preview_url": "/api/preview/uuid",
-  "download_url": "/api/download/uuid",
-  "expires_in_seconds": 3600
-}
-```
-
-### Preview Audio
-```bash
-GET /api/preview/<file_id>
-# Streams audio for in-browser preview
-```
-
-### Download Audio
-```bash
-GET /api/download/<file_id>
-# Downloads the processed file
-```
-
-### Get File Info
-```bash
-GET /api/file/<file_id>
-```
-
-### Delete File
-```bash
-DELETE /api/file/<file_id>
-```
-
-### Storage Stats
-```bash
-GET /api/stats
-```
-
-## 🧪 Testing the Workflow
-
-We've included a test script to demonstrate the complete workflow:
-
-```bash
-# Install requests if needed
-pip install requests
-
-# Run the test
-python test_workflow.py path/to/audio.mp3
-```
-
-This will:
-1. Upload and process your audio
-2. Retrieve file information
-3. Generate preview/download URLs
-4. Download the processed file
-5. Show storage statistics
-6. Clean up the file
 
 ## 🔧 Configuration
 
@@ -284,54 +167,19 @@ curl http://localhost:5000/api/health
 curl http://localhost:5000/api/stats
 ```
 
-### Docker Health
-```bash
-docker ps
-# Look for (healthy) status
-```
-
 ## 🔒 Security Notes
+
+Currently, Vinylfy does not require any authorization to enjoy! If you wish to add login security, please add this through your reverse proxy or other authentication service. 
 
 For production deployment:
 1. Change `SECRET_KEY` in `.env`
-2. Set specific `CORS_ORIGINS` (not `*`)
-3. Use HTTPS with a reverse proxy (nginx/caddy)
-4. Set `DEBUG_MODE=false`
-5. Consider adding authentication
+2. Use HTTPS with a reverse proxy (nginx/caddy)
+3. Consider adding authentication
 
 ## 🎯 Supported Formats
 
 **Input:** WAV, MP3, FLAC, OGG, M4A, AAC  
 **Output:** WAV, MP3, FLAC, OGG
-
-## 🛠️ Development
-
-### Local Development (without Docker)
-
-```bash
-cd table
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run development server
-export FLASK_ENV=development
-export DEBUG_MODE=true
-python -m app.main
-```
-
-### Running Tests
-```bash
-# Install test dependencies
-pip install pytest requests
-
-# Run the workflow test
-python test_workflow.py test_audio.mp3
-```
 
 ## 🐛 Troubleshooting
 
@@ -350,22 +198,8 @@ python test_workflow.py test_audio.mp3
 - Check `FILE_TTL_HOURS` in `.env`
 - Verify file_id is correct
 
-### Docker container unhealthy
-```bash
-# Check logs
-docker-compose logs table
-
-# Restart
-docker-compose restart table
-```
-
-## 📝 License
-
-MIT License - Feel free to use in your projects!
-
 ## 🚧 Coming Soon
 
-- **needle** (Frontend) - Beautiful web interface
 - Batch processing
 - Audio visualization
 - More effect presets
