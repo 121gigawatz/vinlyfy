@@ -583,14 +583,14 @@ class VinylApp {
         });
     }
 
-    // Install prompt
+    // Install prompt for Android/Desktop
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      
+
       if (installBtn && !isPWAInstalled()) {
         installBtn.classList.remove('hidden');
       }
@@ -612,6 +612,83 @@ class VinylApp {
     if (isPWAInstalled() && installBtn) {
       installBtn.classList.add('hidden');
     }
+
+    // iOS-specific install prompt
+    this.setupIOSInstallPrompt();
+  }
+
+  /**
+   * Setup iOS install prompt banner
+   */
+  setupIOSInstallPrompt() {
+    // Check if device is iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
+
+    // Don't show if not iOS, already installed, or user dismissed it
+    if (!isIOS || isInStandaloneMode || localStorage.getItem('vinylfy_ios_install_dismissed')) {
+      return;
+    }
+
+    // Create iOS install banner
+    const banner = document.createElement('div');
+    banner.id = 'iosInstallBanner';
+    banner.innerHTML = `
+      <div style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, var(--color-primary) 0%, #b8894d 100%);
+        color: white;
+        padding: var(--space-md);
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        animation: slideUp 0.3s ease-out;
+      ">
+        <div style="max-width: 600px; margin: 0 auto; display: flex; align-items: center; gap: var(--space-md);">
+          <img src="/assets/icons/apple-touch-icon.png" alt="Vinylfy" style="width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: var(--font-weight-semibold); margin-bottom: var(--space-xs);">
+              Install Vinylfy
+            </div>
+            <div style="font-size: var(--font-size-sm); opacity: 0.95;">
+              Tap <svg viewBox="0 0 24 24" style="width: 1em; height: 1em; display: inline; vertical-align: middle; fill: currentColor; margin: 0 2px;"><path d="M12 2C11.5 2 11 2.19 10.59 2.59L2.59 10.59C1.8 11.37 1.8 12.63 2.59 13.41C3.37 14.2 4.63 14.2 5.41 13.41L11 7.83V19C11 20.1 11.9 21 13 21S15 20.1 15 19V7.83L20.59 13.41C21.37 14.2 22.63 14.2 23.41 13.41C24.2 12.63 24.2 11.37 23.41 10.59L15.41 2.59C15 2.19 14.5 2 12 2Z"/></svg> then "Add to Home Screen"
+            </div>
+          </div>
+          <button id="iosInstallClose" style="
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          ">×</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    // Close button handler
+    document.getElementById('iosInstallClose').addEventListener('click', () => {
+      banner.remove();
+      localStorage.setItem('vinylfy_ios_install_dismissed', 'true');
+    });
+
+    // Auto-hide after 30 seconds
+    setTimeout(() => {
+      if (banner.parentNode) {
+        banner.style.animation = 'slideDown 0.3s ease-out';
+        setTimeout(() => banner.remove(), 300);
+      }
+    }, 30000);
   }
 
   /**
