@@ -8,14 +8,42 @@
 
 ### Option 1: Deploy from GitHub Release (Recommended)
 
+#### For Windows (PowerShell):
+
+1. **Download the beta release:**
+   - Go to: https://github.com/121gigawatz/vinlyfy/releases/tag/beta
+   - Download `Source code (zip)` or `Source code (tar.gz)`
+   - Extract the archive (right-click > Extract All)
+   - The files will be in a folder named `vinlyfy-beta`
+
+2. **Navigate to the extracted folder:**
+   ```powershell
+   cd vinlyfy-beta
+   # Verify Dockerfile exists
+   dir Dockerfile
+   ```
+
+3. **Build and run:**
+   ```powershell
+   docker compose up -d
+   ```
+
+4. **Access the application:**
+   - Open your browser to: http://localhost:8888
+
+#### For macOS/Linux:
+
 1. **Download the beta release:**
    ```bash
    # Download the release tarball
    curl -L https://github.com/121gigawatz/vinlyfy/archive/refs/tags/beta.tar.gz -o vinylfy-beta.tar.gz
 
-   # Extract it
+   # Extract it - note it creates a vinlyfy-beta directory
    tar -xzf vinylfy-beta.tar.gz
    cd vinlyfy-beta
+
+   # Verify Dockerfile exists
+   ls -la Dockerfile
    ```
 
 2. **Build and run:**
