@@ -66,13 +66,13 @@ def get_presets():
 def get_supported_formats():
     """
     Get supported input and output audio formats.
-    
+
     Returns:
         JSON response with supported formats
     """
     return jsonify({
         'input_formats': list(Config.ALLOWED_EXTENSIONS),
-        'output_formats': ['wav', 'mp3', 'flac', 'ogg']
+        'output_formats': sorted(list(Config.ALLOWED_OUTPUT_FORMATS))
     }), 200
 
 
@@ -121,8 +121,14 @@ def process_audio():
         
         # Get preset and output format
         preset_name = request.form.get('preset', 'medium').lower()
-        output_format = request.form.get('output_format', 'wav').lower()
-        
+        output_format = request.form.get('output_format', 'mp3').lower() # Set MP3 as default
+
+        # Validate output format
+        if output_format not in Config.ALLOWED_OUTPUT_FORMATS:
+            return jsonify({
+                'error': f'Invalid output format. Allowed: {", ".join(sorted(Config.ALLOWED_OUTPUT_FORMATS))}'
+            }), 400
+
         # Validate preset
         if preset_name not in Config.PRESETS:
             return jsonify({

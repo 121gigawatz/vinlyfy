@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: vinylfy:beta-2.1
+    image: vinylfy:beta-2.2
     container_name: vinylfy
     ports:
       - "${PORT:-8888}:80"
@@ -21,8 +21,8 @@ services:
       # File storage
       - FILE_TTL_HOURS=${FILE_TTL_HOURS:-1}
 
-      # CORS Settings (not needed since nginx handles it)
-      - CORS_ORIGINS=http://localhost
+      # CORS Settings - set to * to allow all origins since nginx proxies everything from same origin
+      - CORS_ORIGINS=*
     
     volumes:
       # Development: mount code for live reload (comment out for production)

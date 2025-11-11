@@ -10,7 +10,7 @@ of vinyl records including:
 - Mechancial Artifacts like pops
 """
 
-__version__ = 'beta'
+__version__ = 'BETA 2.2'
 __author__ = 'Vinylfy by Brett Watz'
 
 from .main import create_app

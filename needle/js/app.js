@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'BETA 2.1';
+const APP_VERSION = 'BETA 2.2';
 
-import api from './api.js?v=beta2.1';
-import AudioPlayer from './audio-player.js?v=beta2.1';
+import api from './api.js?v=beta2.2';
+import AudioPlayer from './audio-player.js?v=beta2.2';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,7 +16,7 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.1';
+} from './utils.js?v=beta2.2';
 
 class VinylApp {
   constructor() {
@@ -30,6 +30,7 @@ class VinylApp {
     this.isLoadingPreset = false; // Flag to prevent auto-switching to custom during preset load
     this.appVersion = APP_VERSION;
     this.fileTTL = 1; // Default, will be updated from API
+    this.maxUploadMB = 25; // Default, will be updated from API
 
     this.init();
   }
@@ -59,6 +60,7 @@ class VinylApp {
     this.setupCustomControls();
     this.setupProcessButton();
     this.setupThemeToggle();
+    this.setupGitHubStars();
 
     // Initialize audio player
     this.audioPlayer = new AudioPlayer('audioPlayerContainer');
@@ -142,10 +144,14 @@ class VinylApp {
         // Update app info from API
         if (health.config) {
           this.fileTTL = health.config.file_ttl_hours || 1;
+          this.maxUploadMB = health.config.max_upload_mb || 25;
         }
 
         // Update footer with version and TTL
         this.updateFooterInfo();
+
+        // Update file upload hint with max size
+        this.updateFileUploadHint();
       } else {
         throw new Error('API unhealthy');
       }
@@ -154,8 +160,9 @@ class VinylApp {
       healthStatus.className = 'badge badge-error';
       showToast('Cannot connect to server. Please check if the table is running.', 'error', 5000);
 
-      // Still update footer with defaults
+      // Still update footer and upload hint with defaults
       this.updateFooterInfo();
+      this.updateFileUploadHint();
     }
   }
 
@@ -164,7 +171,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.1';
+      const currentVersion = 'beta2.2';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -249,6 +256,16 @@ class VinylApp {
         ? '1 hour'
         : `${this.fileTTL} hours`;
       ttlElement.textContent = `Files auto-delete after ${ttlText}`;
+    }
+  }
+
+  /**
+   * Update file upload hint with max file size from API
+   */
+  updateFileUploadHint() {
+    const hintElement = document.getElementById('fileUploadHint');
+    if (hintElement) {
+      hintElement.textContent = `Supports: WAV, MP3, FLAC, OGG, M4A, AAC (Max ${this.maxUploadMB}MB)`;
     }
   }
 
@@ -421,9 +438,13 @@ class VinylApp {
     const surfaceNoiseToggle = document.getElementById('surfaceNoise');
     const noiseIntensity = document.getElementById('noiseIntensity');
     const noiseIntensityValue = document.getElementById('noiseIntensityValue');
+    const popIntensity = document.getElementById('popIntensity');
+    const popIntensityValue = document.getElementById('popIntensityValue');
 
     surfaceNoiseToggle.addEventListener('change', (e) => {
       this.customSettings.surface_noise = e.target.checked;
+      noiseIntensity.disabled = !e.target.checked;
+      popIntensity.disabled = !e.target.checked;
       this.switchToCustomPreset();
     });
 
@@ -435,9 +456,6 @@ class VinylApp {
     });
 
     // Pop intensity slider
-    const popIntensity = document.getElementById('popIntensity');
-    const popIntensityValue = document.getElementById('popIntensityValue');
-
     popIntensity.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.pop_intensity = value;
@@ -452,6 +470,7 @@ class VinylApp {
 
     wowFlutterToggle.addEventListener('change', (e) => {
       this.customSettings.wow_flutter = e.target.checked;
+      wowFlutterIntensity.disabled = !e.target.checked;
       this.switchToCustomPreset();
     });
 
@@ -469,6 +488,7 @@ class VinylApp {
 
     harmonicDistortionToggle.addEventListener('change', (e) => {
       this.customSettings.harmonic_distortion = e.target.checked;
+      distortionAmount.disabled = !e.target.checked;
       this.switchToCustomPreset();
     });
 
@@ -486,6 +506,7 @@ class VinylApp {
 
     stereoReductionToggle.addEventListener('change', (e) => {
       this.customSettings.stereo_reduction = e.target.checked;
+      stereoWidth.disabled = !e.target.checked;
       this.switchToCustomPreset();
     });
 
@@ -577,6 +598,79 @@ class VinylApp {
         btn.classList.remove('active');
       }
     });
+  }
+
+  /**
+   * Setup GitHub stars
+   */
+  setupGitHubStars() {
+    // Extract repo info from the link's href attribute
+    const githubLink = document.getElementById('githubLink');
+    if (!githubLink) return;
+
+    const href = githubLink.getAttribute('href');
+    const match = href.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+
+    if (!match) {
+      console.warn('Could not parse GitHub repo from URL');
+      return;
+    }
+
+    const [, owner, repo] = match;
+    this.fetchGitHubStars(owner, repo);
+  }
+
+  /**
+   * Fetch GitHub stars count
+   */
+  async fetchGitHubStars(owner, repo) {
+    const starNumber = document.getElementById('starNumber');
+
+    try {
+      // Check cache first (cache for 1 hour)
+      const cacheKey = `github_stars_${owner}_${repo}`;
+      const cached = localStorage.getItem(cacheKey);
+      const cacheTime = localStorage.getItem(`${cacheKey}_time`);
+
+      if (cached && cacheTime) {
+        const age = Date.now() - parseInt(cacheTime);
+        if (age < 3600000) { // 1 hour
+          starNumber.textContent = this.formatStarCount(parseInt(cached));
+          return;
+        }
+      }
+
+      // Fetch from GitHub API
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      const stars = data.stargazers_count;
+
+      // Update UI
+      starNumber.textContent = this.formatStarCount(stars);
+
+      // Cache the result
+      localStorage.setItem(cacheKey, stars.toString());
+      localStorage.setItem(`${cacheKey}_time`, Date.now().toString());
+
+    } catch (error) {
+      console.warn('Failed to fetch GitHub stars:', error);
+      starNumber.textContent = '—';
+    }
+  }
+
+  /**
+   * Format star count for display
+   */
+  formatStarCount(count) {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    }
+    return count.toString();
   }
 
   /**
@@ -802,25 +896,27 @@ class VinylApp {
     }
 
     // Install prompt for Android/Desktop
-    let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
-      deferredPrompt = e;
+      this.deferredPrompt = e;
 
       if (installBtn && !isPWAInstalled()) {
         installBtn.classList.remove('hidden');
       }
+
+      // Show Android install banner
+      this.setupAndroidInstallBanner();
     });
 
     if (installBtn) {
       installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
+        if (this.deferredPrompt) {
+          this.deferredPrompt.prompt();
+          const { outcome } = await this.deferredPrompt.userChoice;
           console.log(`Install prompt outcome: ${outcome}`);
-          deferredPrompt = null;
+          this.deferredPrompt = null;
           installBtn.classList.add('hidden');
         }
       });
@@ -898,6 +994,108 @@ class VinylApp {
     document.getElementById('iosInstallClose').addEventListener('click', () => {
       banner.remove();
       localStorage.setItem('vinylfy_ios_install_dismissed', 'true');
+    });
+
+    // Auto-hide after 30 seconds
+    setTimeout(() => {
+      if (banner.parentNode) {
+        banner.style.animation = 'slideDown 0.3s ease-out';
+        setTimeout(() => banner.remove(), 300);
+      }
+    }, 30000);
+  }
+
+  /**
+   * Setup Android install banner
+   */
+  setupAndroidInstallBanner() {
+    // Don't show if user dismissed it or already installed
+    if (isPWAInstalled() || localStorage.getItem('vinylfy_android_install_dismissed')) {
+      return;
+    }
+
+    // Create Android install banner
+    const banner = document.createElement('div');
+    banner.id = 'androidInstallBanner';
+    banner.innerHTML = `
+      <div style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, var(--color-primary) 0%, #b8894d 100%);
+        color: white;
+        padding: var(--space-md);
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+        z-index: 9999;
+        animation: slideUp 0.3s ease-out;
+      ">
+        <div style="max-width: 600px; margin: 0 auto; display: flex; align-items: center; gap: var(--space-md);">
+          <img src="/assets/icons/android-touch-icon.png" alt="Vinylfy" style="width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: var(--font-weight-semibold); margin-bottom: var(--space-xs);">
+              Install Vinylfy
+            </div>
+            <div style="font-size: var(--font-size-sm); opacity: 0.95;">
+              Add to your home screen for quick access and offline use
+            </div>
+          </div>
+          <button id="androidInstallAccept" style="
+            background: rgba(255,255,255,0.9);
+            border: none;
+            color: var(--color-primary);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            white-space: nowrap;
+            flex-shrink: 0;
+          ">Install</button>
+          <button id="androidInstallClose" style="
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          ">×</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    // Install button handler
+    document.getElementById('androidInstallAccept').addEventListener('click', async () => {
+      if (this.deferredPrompt) {
+        this.deferredPrompt.prompt();
+        const { outcome } = await this.deferredPrompt.userChoice;
+        console.log(`Android install prompt outcome: ${outcome}`);
+
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+
+        // Remove banner after user makes a choice
+        banner.remove();
+        localStorage.setItem('vinylfy_android_install_dismissed', 'true');
+        this.deferredPrompt = null;
+      }
+    });
+
+    // Close button handler
+    document.getElementById('androidInstallClose').addEventListener('click', () => {
+      banner.remove();
+      localStorage.setItem('vinylfy_android_install_dismissed', 'true');
     });
 
     // Auto-hide after 30 seconds

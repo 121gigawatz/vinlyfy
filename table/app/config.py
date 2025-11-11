@@ -20,6 +20,7 @@ class Config:
     PROCESSED_FILES_DIR = Path('/tmp/vinylfy/processed')
     PROCESSED_FILES_TTL_HOURS = 1
     ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'ogg', 'm4a', 'aac'}
+    ALLOWED_OUTPUT_FORMATS = {'wav', 'mp3', 'aac', 'flac', 'ogg'}
 
     # Audio Processing Settings
     DEFAULT_SAMPLE_RATE = 44100
