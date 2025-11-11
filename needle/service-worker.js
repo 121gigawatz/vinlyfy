@@ -1,5 +1,5 @@
-const CACHE_NAME = 'vinylfy-v1.0.0-beta2.2.1';
-const RUNTIME_CACHE = 'vinylfy-runtime-beta2.2.1';
+const CACHE_NAME = 'vinylfy-beta2.2.2';
+const RUNTIME_CACHE = 'vinylfy-runtime-beta2.2.2';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -67,19 +67,30 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Log all fetch requests for debugging
+  console.log('[Service Worker] Fetch:', request.method, url.pathname);
+
   // Skip cross-origin requests
   if (url.origin !== location.origin) {
+    console.log('[Service Worker] Skipping cross-origin:', url.origin);
     return;
   }
 
   // Skip API calls (always go to network)
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(request)
-        .catch(() => {
+      fetch(request, {
+        // Add credentials for CORS
+        credentials: 'same-origin',
+        // Add timeout handling
+        signal: AbortSignal.timeout(30000) // 30 second timeout
+      })
+        .catch((error) => {
+          console.error('[Service Worker] API fetch failed:', error.name, error.message);
           return new Response(
-            JSON.stringify({ 
-              error: 'Network unavailable. Please check your connection.' 
+            JSON.stringify({
+              error: 'Network unavailable. Please check your connection.',
+              details: error.message
             }),
             {
               status: 503,

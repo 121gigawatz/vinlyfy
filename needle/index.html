@@ -24,10 +24,10 @@
   <title>Vinylfy</title>
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="/css/variables.css?v=beta2.1">
-  <link rel="stylesheet" href="/css/base.css?v=beta2.1">
-  <link rel="stylesheet" href="/css/components.css?v=beta2.1">
-  <link rel="stylesheet" href="/css/responsive.css?v=beta2.1">
+  <link rel="stylesheet" href="/css/variables.css?v=beta2.2.2">
+  <link rel="stylesheet" href="/css/base.css?v=beta2.2.2">
+  <link rel="stylesheet" href="/css/components.css?v=beta2.2.2">
+  <link rel="stylesheet" href="/css/responsive.css?v=beta2.2.2">
 </head>
 <body>
   <!-- Header -->
@@ -451,7 +451,37 @@
     </div>
   </footer>
 
+  <!-- Cache Update Modal -->
+  <div id="cacheUpdateModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="color: var(--color-primary); margin: 0;">🔄 Update Available</h3>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: var(--space-md); color: var(--color-text-primary);">
+          A new version of Vinylfy is available! Your browser is showing an older cached version.
+        </p>
+        <div style="background: var(--color-bg-secondary); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md);">
+          <p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+            <strong>Current cached:</strong> <span id="cachedVersion">—</span><br>
+            <strong>Latest version:</strong> <span id="latestVersion">—</span>
+          </p>
+        </div>
+        <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+          Click the button below to clear your cache and reload the latest version.
+        </p>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: var(--space-sm); justify-content: flex-end;">
+        <button id="dismissCacheModal" class="btn btn-ghost">Later</button>
+        <button id="clearCacheBtn" class="btn btn-primary">
+          🧹 Clear Cache & Reload
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
-  <script type="module" src="/js/app.js?v=beta2.1"></script>
+  <script type="module" src="/js/app.js?v=beta2.2.2"></script>
 </body>
 </html>

@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 2.2.1';
+const APP_VERSION = 'v1.0.0 Beta 2.2.2';
 
-import api from './api.js?v=beta2.2.1';
-import AudioPlayer from './audio-player.js?v=beta2.2.1';
+import api from './api.js?v=beta2.2.2';
+import AudioPlayer from './audio-player.js?v=beta2.2.2';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,7 +16,7 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.2.1';
+} from './utils.js?v=beta2.2.2';
 
 class VinylApp {
   constructor() {
@@ -40,6 +40,9 @@ class VinylApp {
    */
   async init() {
     console.log('🎵 Vinylfy initializing...');
+
+    // Check for version mismatch and show modal if needed
+    await this.checkCacheVersion();
 
     // Check for version change and clear old data
     await this.checkVersionAndCleanup();
@@ -130,6 +133,99 @@ class VinylApp {
   }
 
   /**
+   * Check for cache version mismatch and show modal
+   */
+  async checkCacheVersion() {
+    try {
+      // Get API version
+      const health = await api.checkHealth();
+      const serverVersion = health.version || 'unknown';
+      const clientVersion = this.appVersion;
+
+      // Check if versions match
+      if (serverVersion !== clientVersion && serverVersion !== 'unknown') {
+        console.warn(`⚠️ Version mismatch detected!`);
+        console.warn(`Client: ${clientVersion}, Server: ${serverVersion}`);
+
+        // Show the cache update modal
+        this.showCacheUpdateModal(clientVersion, serverVersion);
+      }
+    } catch (error) {
+      console.warn('Could not check cache version:', error);
+    }
+  }
+
+  /**
+   * Show cache update modal
+   */
+  showCacheUpdateModal(cachedVersion, latestVersion) {
+    const modal = document.getElementById('cacheUpdateModal');
+    const cachedVersionEl = document.getElementById('cachedVersion');
+    const latestVersionEl = document.getElementById('latestVersion');
+    const clearCacheBtn = document.getElementById('clearCacheBtn');
+    const dismissBtn = document.getElementById('dismissCacheModal');
+
+    // Set version info
+    cachedVersionEl.textContent = cachedVersion;
+    latestVersionEl.textContent = latestVersion;
+
+    // Show modal
+    modal.classList.remove('hidden');
+
+    // Clear cache button
+    clearCacheBtn.onclick = async () => {
+      clearCacheBtn.disabled = true;
+      clearCacheBtn.innerHTML = '<span class="spinner spinner-sm"></span> Clearing...';
+
+      await this.clearAllCaches();
+
+      // Force reload
+      window.location.reload(true);
+    };
+
+    // Dismiss button
+    dismissBtn.onclick = () => {
+      modal.classList.add('hidden');
+    };
+
+    // Close on overlay click
+    const overlay = modal.querySelector('.modal-overlay');
+    overlay.onclick = () => {
+      modal.classList.add('hidden');
+    };
+  }
+
+  /**
+   * Clear all caches and service workers
+   */
+  async clearAllCaches() {
+    try {
+      console.log('🧹 Clearing all caches...');
+
+      // Clear all browser caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        console.log('✅ All caches cleared');
+      }
+
+      // Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+        console.log('✅ All service workers unregistered');
+      }
+
+      // Clear localStorage version to trigger fresh version check
+      localStorage.removeItem('vinylfy_version');
+
+      console.log('✅ Cache clearing complete!');
+    } catch (error) {
+      console.error('Error clearing caches:', error);
+    }
+  }
+
+  /**
    * Check if API is available
    */
   async checkAPIHealth() {
@@ -171,7 +267,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.2.1';
+      const currentVersion = 'beta2.2.2';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -905,15 +1001,42 @@ class VinylApp {
    * Setup PWA functionality
    */
   setupPWA() {
-    // Register service worker
+    // Check if service worker bypass is requested (for debugging mobile issues)
+    const urlParams = new URLSearchParams(window.location.search);
+    const bypassSW = urlParams.get('no-sw') === 'true';
+
+    if (bypassSW) {
+      console.log('🚫 Service Worker bypassed via URL parameter');
+      // Unregister existing service workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => {
+            console.log('Unregistering service worker:', registration.scope);
+            registration.unregister();
+          });
+        });
+      }
+      return; // Don't proceed with PWA setup
+    }
+
+    // Register service worker with better error handling
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js')
         .then(registration => {
-          console.log('Service Worker registered:', registration);
+          console.log('✅ Service Worker registered successfully:', registration.scope);
+
+          // Check for updates every hour
+          setInterval(() => {
+            registration.update();
+          }, 3600000);
         })
         .catch(error => {
-          console.error('Service Worker registration failed:', error);
+          console.error('❌ Service Worker registration failed:', error);
+          console.log('App will continue to work without offline support');
+          // Don't block the app if SW registration fails
         });
+    } else {
+      console.log('ℹ️ Service Workers not supported in this browser');
     }
 
     // Install prompt for Android/Desktop
@@ -1207,6 +1330,168 @@ class VinylApp {
     document.getElementById('stereoWidthGroup').style.display = this.customSettings.stereo_reduction ? 'block' : 'none';
   }
 }
+
+// Global diagnostic function for troubleshooting
+window.vinylDiagnostics = async function() {
+  console.log('🔍 Running Vinylfy diagnostics...\n');
+
+  const results = {
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    url: window.location.href,
+    protocol: window.location.protocol,
+    serviceWorker: {},
+    cache: {},
+    network: {},
+    localStorage: {}
+  };
+
+  // Check Service Worker
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    results.serviceWorker.supported = true;
+    results.serviceWorker.registrations = registrations.length;
+    results.serviceWorker.controller = navigator.serviceWorker.controller ? 'Active' : 'None';
+
+    if (registrations.length > 0) {
+      results.serviceWorker.scopes = registrations.map(r => r.scope);
+      results.serviceWorker.states = registrations.map(r =>
+        r.active ? r.active.state : 'No active worker'
+      );
+    }
+  } else {
+    results.serviceWorker.supported = false;
+  }
+
+  // Check Cache
+  if ('caches' in window) {
+    const cacheNames = await caches.keys();
+    results.cache.supported = true;
+    results.cache.cacheNames = cacheNames;
+    results.cache.count = cacheNames.length;
+  } else {
+    results.cache.supported = false;
+  }
+
+  // Check localStorage
+  try {
+    results.localStorage.supported = true;
+    results.localStorage.version = localStorage.getItem('vinylfy_version');
+    results.localStorage.itemCount = localStorage.length;
+  } catch (e) {
+    results.localStorage.supported = false;
+    results.localStorage.error = e.message;
+  }
+
+  // Check network connectivity
+  results.network.online = navigator.onLine;
+  results.network.connectionType = navigator.connection ? navigator.connection.effectiveType : 'unknown';
+
+  // Test API connection
+  try {
+    const startTime = Date.now();
+    const response = await fetch('/api/health', {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    const endTime = Date.now();
+    const data = await response.json();
+
+    results.network.apiReachable = true;
+    results.network.apiStatus = response.status;
+    results.network.apiLatency = `${endTime - startTime}ms`;
+    results.network.apiVersion = data.version;
+  } catch (error) {
+    results.network.apiReachable = false;
+    results.network.apiError = error.message;
+  }
+
+  // Display results
+  console.log('📊 Diagnostic Results:');
+  console.log('─────────────────────────────────────');
+  console.log(`🌐 Browser: ${results.userAgent}`);
+  console.log(`📍 URL: ${results.url}`);
+  console.log(`🔒 Protocol: ${results.protocol}`);
+  console.log(`\n🔧 Service Worker:`);
+  console.log(`   Supported: ${results.serviceWorker.supported}`);
+  if (results.serviceWorker.supported) {
+    console.log(`   Active: ${results.serviceWorker.controller}`);
+    console.log(`   Registrations: ${results.serviceWorker.registrations}`);
+    if (results.serviceWorker.scopes) {
+      console.log(`   Scopes: ${results.serviceWorker.scopes.join(', ')}`);
+    }
+  }
+  console.log(`\n💾 Cache:`);
+  console.log(`   Supported: ${results.cache.supported}`);
+  if (results.cache.supported) {
+    console.log(`   Active Caches: ${results.cache.count}`);
+    console.log(`   Names: ${results.cache.cacheNames.join(', ')}`);
+  }
+  console.log(`\n🌍 Network:`);
+  console.log(`   Online: ${results.network.online}`);
+  console.log(`   Connection: ${results.network.connectionType}`);
+  console.log(`   API Reachable: ${results.network.apiReachable}`);
+  if (results.network.apiReachable) {
+    console.log(`   API Status: ${results.network.apiStatus}`);
+    console.log(`   API Latency: ${results.network.apiLatency}`);
+    console.log(`   Server Version: ${results.network.apiVersion}`);
+  } else {
+    console.log(`   API Error: ${results.network.apiError}`);
+  }
+  console.log(`\n💿 localStorage:`);
+  console.log(`   Supported: ${results.localStorage.supported}`);
+  if (results.localStorage.supported) {
+    console.log(`   Stored Version: ${results.localStorage.version || 'Not set'}`);
+    console.log(`   Items: ${results.localStorage.itemCount}`);
+  }
+  console.log('─────────────────────────────────────');
+  console.log('\n💡 Tips:');
+  console.log('   • To bypass service worker: Add ?no-sw=true to URL');
+  console.log('   • To clear cache: window.vinylClearCache()');
+  console.log('   • For help: See TROUBLESHOOTING.md');
+  console.log('\n📋 Full results object available as: window.lastDiagnostics');
+
+  window.lastDiagnostics = results;
+  return results;
+};
+
+// Global cache clearing function
+window.vinylClearCache = async function() {
+  console.log('🧹 Clearing all Vinylfy caches and service workers...');
+
+  try {
+    // Clear caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      console.log('✅ All caches cleared');
+    }
+
+    // Unregister service workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(reg => reg.unregister()));
+      console.log('✅ All service workers unregistered');
+    }
+
+    // Clear localStorage
+    localStorage.removeItem('vinylfy_version');
+    console.log('✅ localStorage cleared');
+
+    console.log('\n🔄 Please reload the page for changes to take effect');
+    console.log('   Run: location.reload(true)');
+
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Error clearing cache:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+console.log('🎵 Vinylfy loaded!');
+console.log('💡 Available commands:');
+console.log('   • vinylDiagnostics() - Run connection diagnostics');
+console.log('   • vinylClearCache() - Clear all caches and service workers');
 
 // Initialize app when DOM is ready
 if (document.readyState === 'loading') {
