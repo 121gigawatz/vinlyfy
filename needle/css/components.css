@@ -88,6 +88,7 @@
   cursor: pointer;
   transition: all var(--transition-base);
   white-space: nowrap;
+  -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -374,6 +375,7 @@
   align-items: center;
   gap: var(--space-md);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 }
 

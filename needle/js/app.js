@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'BETA 2.2';
+const APP_VERSION = 'v1.0.0 Beta 2.2.1';
 
-import api from './api.js?v=beta2.2';
-import AudioPlayer from './audio-player.js?v=beta2.2';
+import api from './api.js?v=beta2.2.1';
+import AudioPlayer from './audio-player.js?v=beta2.2.1';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,13 +16,13 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.2';
+} from './utils.js?v=beta2.2.1';
 
 class VinylApp {
   constructor() {
     this.selectedFile = null;
     this.processedFileId = null;
-    this.currentPreset = 'medium';
+    this.currentPreset = 'AJW Recommended';
     this.outputFormat = 'mp3';
     this.audioPlayer = null;
     this.presets = {};
@@ -171,7 +171,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.2';
+      const currentVersion = 'beta2.2.1';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -375,11 +375,17 @@ class VinylApp {
       'custom': 'Custom - Full control'
     };
 
-    Object.keys(this.presets).forEach(preset => {
-      const option = document.createElement('option');
-      option.value = preset;
-      option.textContent = presetDescriptions[preset] || formatPresetName(preset);
-      presetSelector.appendChild(option);
+    // Define preset order
+    const presetOrder = ['AJW Recommended', 'light', 'medium', 'heavy', 'vintage', 'custom'];
+
+    // Add presets in specified order
+    presetOrder.forEach(preset => {
+      if (this.presets[preset]) {
+        const option = document.createElement('option');
+        option.value = preset;
+        option.textContent = presetDescriptions[preset] || formatPresetName(preset);
+        presetSelector.appendChild(option);
+      }
     });
 
     presetSelector.value = this.currentPreset;
@@ -438,13 +444,16 @@ class VinylApp {
     const surfaceNoiseToggle = document.getElementById('surfaceNoise');
     const noiseIntensity = document.getElementById('noiseIntensity');
     const noiseIntensityValue = document.getElementById('noiseIntensityValue');
+    const noiseIntensityGroup = document.getElementById('noiseIntensityGroup');
     const popIntensity = document.getElementById('popIntensity');
     const popIntensityValue = document.getElementById('popIntensityValue');
+    const popIntensityGroup = document.getElementById('popIntensityGroup');
 
     surfaceNoiseToggle.addEventListener('change', (e) => {
       this.customSettings.surface_noise = e.target.checked;
-      noiseIntensity.disabled = !e.target.checked;
-      popIntensity.disabled = !e.target.checked;
+      // Hide/show slider groups instead of disabling
+      noiseIntensityGroup.style.display = e.target.checked ? 'block' : 'none';
+      popIntensityGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
     });
 
@@ -467,10 +476,12 @@ class VinylApp {
     const wowFlutterToggle = document.getElementById('wowFlutter');
     const wowFlutterIntensity = document.getElementById('wowFlutterIntensity');
     const wowFlutterValue = document.getElementById('wowFlutterValue');
+    const wowFlutterIntensityGroup = document.getElementById('wowFlutterIntensityGroup');
 
     wowFlutterToggle.addEventListener('change', (e) => {
       this.customSettings.wow_flutter = e.target.checked;
-      wowFlutterIntensity.disabled = !e.target.checked;
+      // Hide/show slider group instead of disabling
+      wowFlutterIntensityGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
     });
 
@@ -485,10 +496,12 @@ class VinylApp {
     const harmonicDistortionToggle = document.getElementById('harmonicDistortion');
     const distortionAmount = document.getElementById('distortionAmount');
     const distortionValue = document.getElementById('distortionValue');
+    const distortionAmountGroup = document.getElementById('distortionAmountGroup');
 
     harmonicDistortionToggle.addEventListener('change', (e) => {
       this.customSettings.harmonic_distortion = e.target.checked;
-      distortionAmount.disabled = !e.target.checked;
+      // Hide/show slider group instead of disabling
+      distortionAmountGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
     });
 
@@ -503,10 +516,12 @@ class VinylApp {
     const stereoReductionToggle = document.getElementById('stereoReduction');
     const stereoWidth = document.getElementById('stereoWidth');
     const stereoWidthValue = document.getElementById('stereoWidthValue');
+    const stereoWidthGroup = document.getElementById('stereoWidthGroup');
 
     stereoReductionToggle.addEventListener('change', (e) => {
       this.customSettings.stereo_reduction = e.target.checked;
-      stereoWidth.disabled = !e.target.checked;
+      // Hide/show slider group instead of disabling
+      stereoWidthGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
     });
 
@@ -640,8 +655,14 @@ class VinylApp {
         }
       }
 
-      // Fetch from GitHub API
-      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+      // Fetch from GitHub API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`GitHub API returned ${response.status}`);
@@ -1157,20 +1178,33 @@ class VinylApp {
    */
   updateCustomControlValues() {
     document.getElementById('frequencyResponse').checked = this.customSettings.frequency_response;
+
     document.getElementById('surfaceNoise').checked = this.customSettings.surface_noise;
     document.getElementById('noiseIntensity').value = this.customSettings.noise_intensity;
     document.getElementById('noiseIntensityValue').textContent = this.customSettings.noise_intensity.toFixed(3);
     document.getElementById('popIntensity').value = this.customSettings.pop_intensity;
     document.getElementById('popIntensityValue').textContent = this.customSettings.pop_intensity.toFixed(2);
+    // Hide/show slider groups based on toggle state
+    document.getElementById('noiseIntensityGroup').style.display = this.customSettings.surface_noise ? 'block' : 'none';
+    document.getElementById('popIntensityGroup').style.display = this.customSettings.surface_noise ? 'block' : 'none';
+
     document.getElementById('wowFlutter').checked = this.customSettings.wow_flutter;
     document.getElementById('wowFlutterIntensity').value = this.customSettings.wow_flutter_intensity;
     document.getElementById('wowFlutterValue').textContent = this.customSettings.wow_flutter_intensity.toFixed(4);
+    // Hide/show slider group based on toggle state
+    document.getElementById('wowFlutterIntensityGroup').style.display = this.customSettings.wow_flutter ? 'block' : 'none';
+
     document.getElementById('harmonicDistortion').checked = this.customSettings.harmonic_distortion;
     document.getElementById('distortionAmount').value = this.customSettings.distortion_amount;
     document.getElementById('distortionValue').textContent = this.customSettings.distortion_amount.toFixed(2);
+    // Hide/show slider group based on toggle state
+    document.getElementById('distortionAmountGroup').style.display = this.customSettings.harmonic_distortion ? 'block' : 'none';
+
     document.getElementById('stereoReduction').checked = this.customSettings.stereo_reduction;
     document.getElementById('stereoWidth').value = this.customSettings.stereo_width;
     document.getElementById('stereoWidthValue').textContent = this.customSettings.stereo_width.toFixed(2);
+    // Hide/show slider group based on toggle state
+    document.getElementById('stereoWidthGroup').style.display = this.customSettings.stereo_reduction ? 'block' : 'none';
   }
 }
 

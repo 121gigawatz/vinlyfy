@@ -197,11 +197,11 @@
             <div class="form-group">
               <label for="formatSelector" class="form-label">Output Format</label>
               <select id="formatSelector" class="form-select">
-                <option value="wav">WAV (Highest Quality)</option>
-                <option value="mp3" selected>MP3 (Smaller Size)</option>
                 <option value="aac">AAC (High Quality, Smaller)</option>
+                <option value="mp3" selected>MP3 (Most Compatible)</option>
                 <option value="flac">FLAC (Lossless)</option>
                 <option value="ogg">OGG (Compressed)</option>
+                <option value="wav">WAV (Highest Quality)</option>
               </select>
             </div>
           </div>
@@ -231,7 +231,7 @@
                   </label>
                 </div>
 
-                <div class="range-group">
+                <div class="range-group" id="noiseIntensityGroup">
                   <div class="range-label">
                     <span>Noise Intensity</span>
                     <span class="range-value" id="noiseIntensityValue">0.020</span>
@@ -247,7 +247,7 @@
                   >
                 </div>
 
-                <div class="range-group">
+                <div class="range-group" id="popIntensityGroup">
                   <div class="range-label">
                     <span>Pop Intensity</span>
                     <span class="range-value" id="popIntensityValue">0.60</span>
@@ -272,7 +272,7 @@
                   </label>
                 </div>
 
-                <div class="range-group">
+                <div class="range-group" id="wowFlutterIntensityGroup">
                   <div class="range-label">
                     <span>Wow/Flutter Intensity</span>
                     <span class="range-value" id="wowFlutterValue">0.0010</span>
@@ -300,7 +300,7 @@
                   </label>
                 </div>
 
-                <div class="range-group">
+                <div class="range-group" id="distortionAmountGroup">
                   <div class="range-label">
                     <span>Distortion Amount</span>
                     <span class="range-value" id="distortionValue">0.15</span>
@@ -325,7 +325,7 @@
                   </label>
                 </div>
 
-                <div class="range-group">
+                <div class="range-group" id="stereoWidthGroup">
                   <div class="range-label">
                     <span>Stereo Width</span>
                     <span class="range-value" id="stereoWidthValue">0.70</span>
@@ -349,6 +349,10 @@
         <div class="card-footer">
           <button id="processBtn" class="btn btn-primary btn-lg btn-full" disabled>
             Process Audio
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 8px; vertical-align: middle;">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
           </button>
         </div>
       </div>
