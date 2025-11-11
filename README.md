@@ -37,34 +37,54 @@ Transform your digital audio into warm, nostalgic vinyl records. Vinylfy applies
 
 Files are stored temporarily and auto-expire after the time configured by the administrator.
 
-## 🚀 Quick Start (Unified Deployment)
+## 🚀 Quick Start
 
-### One-Command Setup
+### For Users (Recommended - No Build Required!)
 
+**Just run it:**
 ```bash
-# 1. Clone the repository
-git clone <repo-url>
-cd vinylfy
+# 1. Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/121gigawatz/vinylfy/main/docker-compose.yml
 
-# 2. Create environment file
-cp .env.example .env
+# 2. Start Vinylfy
+docker-compose up -d
 
-# 3. Build and run
-docker-compose up --build
-
-# 4. Open your browser
-# http://localhost
+# 3. Open your browser
+open http://localhost:8888
 ```
 
-That's it! Both frontend and backend run in a single container.
+That's it! The pre-built image is pulled from Docker Hub automatically.
 
-### What's Running?
+**Or clone the repository:**
+```bash
+# 1. Clone
+git clone https://github.com/121gigawatz/vinylfy.git
+cd vinylfy
 
-- **Frontend (Needle)**: Served by nginx on port 80
-- **Backend (Table)**: Flask API at `/api/*`
-- **Single Container**: Everything unified for easy deployment
+# 2. Run
+docker-compose up -d
 
-See [SETUP.md](SETUP.md) for detailed configuration and deployment options.
+# 3. Access
+open http://localhost:8888
+```
+
+### For Developers
+
+**Want to modify or contribute?**
+
+See **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** for:
+- Building from source
+- Local development without Docker
+- Making code changes
+- Version management
+- Contributing guidelines
+
+### 📚 Documentation
+
+- **🚀 Quick Deploy** → You're reading it!
+- **🔧 Configuration** → See Environment Variables below
+- **🐛 Troubleshooting** → [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- **💻 Development** → [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) (for contributors)
 
 ## 🔧 Configuration
 

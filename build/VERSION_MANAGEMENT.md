@@ -1,12 +1,25 @@
 # Version Management
 
-Vinylfy uses a centralized version management system where all version numbers are controlled from a single source of truth: **`version.json`**
+Vinylfy uses a centralized **build-time** version management system where all version numbers are controlled from a single source of truth: **`build/version.json`**
+
+## 🔒 Security Model
+
+**Important:** `build/version.json` is a **build-time only** file that never gets deployed:
+
+- ✅ Lives in the source repository
+- ✅ Used by scripts to update source files
+- ✅ Excluded from Docker images via `.dockerignore`
+- ✅ Not served by nginx
+- ❌ Never accessible at runtime
+- ❌ Cannot be modified by end users or forks post-deployment
+
+Version strings are **embedded directly** into source files during the build process, making them immutable once deployed.
 
 ## Quick Start
 
 To update the version across the entire application:
 
-1. **Edit `version.json`** - Update the version fields:
+1. **Edit `build/version.json`** - Update the version fields:
    ```json
    {
      "version": "v1.0.0 Beta 2.2.3",
@@ -17,14 +30,23 @@ To update the version across the entire application:
 
 2. **Run the update script:**
    ```bash
-   # Using Python (recommended - cross-platform)
-   python3 update-version.py
+   # Option 1: Using Makefile (recommended - simplest)
+   make version
 
-   # OR using Bash (Linux/Mac only)
-   ./update-version.sh
+   # Option 2: Using Python (cross-platform)
+   python3 build/update-version.py
+
+   # Option 3: Using Bash (Linux/Mac only)
+   ./build/update-version.sh
    ```
 
 3. **Done!** All files are now updated with the new version.
+
+4. **Commit the changes** - The updated source files should be committed to git:
+   ```bash
+   git add .
+   git commit -m "Update version to v1.0.0 Beta 2.2.3"
+   ```
 
 ## What Gets Updated
 
@@ -46,8 +68,7 @@ The script automatically updates:
 
 ### Backend Files
 - ✅ `table/app/__init__.py`
-  - Automatically reads from `version.json` at runtime
-  - No manual update needed!
+  - `__version__` constant (embedded at build time)
 
 ### Docker Files
 - ✅ `docker-compose.yml`
@@ -55,7 +76,7 @@ The script automatically updates:
 
 ## Version Format
 
-The `version.json` file contains three version formats:
+The `build/version.json` file contains three version formats:
 
 | Field | Format | Used For | Example |
 |-------|--------|----------|---------|
@@ -68,7 +89,7 @@ The `version.json` file contains three version formats:
 If you need to manually update versions without using the script:
 
 ### Backend
-The backend automatically reads from `version.json` at startup, so no manual changes are needed.
+The backend automatically reads from `build/version.json` at startup, so no manual changes are needed.
 
 ### Frontend
 You would need to update:
@@ -101,19 +122,62 @@ You would need to update:
 - Dev snapshot: `v1.0.0 Dev 2024-11-11`
 - Dev branch: `v1.0.0 Dev feature-x`
 
+## Security Considerations
+
+### Why Build-Time vs Runtime?
+
+**Build-time embedding** (current approach):
+- ✅ Version cannot be tampered with after deployment
+- ✅ Forks can't falsely claim to be a specific version
+- ✅ No runtime file access needed
+- ✅ Simpler deployment (fewer files)
+- ✅ Version is part of the code itself
+
+**Runtime loading** (what we avoided):
+- ❌ Users could modify build/version.json to fake versions
+- ❌ Forks could claim to be official builds
+- ❌ File system access required at runtime
+- ❌ Additional security surface
+- ❌ Can fail if file is missing
+
+### What's Protected
+
+1. **build/version.json** is excluded from Docker images via `.dockerignore`
+2. **No API endpoint** serves build/version.json (nginx blocks it)
+3. **Version strings are compiled** into source files before deployment
+4. **Update scripts** are also excluded from deployment
+
+### For Fork Maintainers
+
+If you maintain a fork of Vinylfy:
+
+1. Update `build/version.json` with your own version identifier
+2. Run the update script to embed your version
+3. Your version will be displayed in the UI and API
+4. Users will see your fork's version, not the original
+
+Example for a fork:
+```json
+{
+  "version": "v1.0.0 Beta 2.2.2-fork-myname",
+  "shortVersion": "beta2.2.2-fork",
+  "dockerTag": "v1.0.0-beta-2.2.2-fork"
+}
+```
+
 ## Troubleshooting
 
-### Script fails to find version.json
-**Error:** `❌ Error: version.json not found!`
+### Script fails to find build/version.json
+**Error:** `❌ Error: build/version.json not found!`
 
 **Solution:** Make sure you're running the script from the project root directory:
 ```bash
 cd /path/to/vinylfy
-python3 update-version.py
+python3 build/update-version.py
 ```
 
 ### Permission denied
-**Error:** `Permission denied: ./update-version.sh`
+**Error:** `Permission denied: ./build/update-version.sh`
 
 **Solution:** Make the script executable:
 ```bash
@@ -155,7 +219,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Update version
-        run: python3 update-version.py
+        run: python3 build/update-version.py
       - name: Commit changes
         run: |
           git config user.name "GitHub Actions"
@@ -169,31 +233,34 @@ jobs:
 Create `.git/hooks/pre-commit`:
 ```bash
 #!/bin/bash
-python3 update-version.py
+python3 build/update-version.py
 git add needle/ docker-compose.yml
 ```
 
 ## Best Practices
 
 1. **Always use the script** - Don't manually edit version strings
-2. **Update version.json first** - Single source of truth
+2. **Update build/version.json first** - Single source of truth
 3. **Test after updating** - Verify the version displays correctly
 4. **Clear caches** - Tell users to clear cache after version updates
-5. **Update buildDate** - Keep the build date current in version.json
-6. **Commit together** - Commit version.json and updated files together
+5. **Update buildDate** - Keep the build date current in build/version.json
+6. **Commit together** - Commit build/version.json and updated files together
 7. **Tag releases** - Create git tags matching version numbers:
    ```bash
    git tag -a v1.0.0-beta-2.2.2 -m "Beta release 2.2.2"
    git push origin v1.0.0-beta-2.2.2
    ```
 
-## Files That Read Version Dynamically
+## How Version is Accessed
 
-These files automatically read from `version.json` or the API:
+All version strings are **embedded at build time** and hardcoded into source files:
 
-- ✅ **Backend** (`table/app/__init__.py`) - Reads `version.json` at startup
-- ✅ **Frontend** (`needle/js/app.js`) - Fetches version from `/api/health` endpoint
-- ✅ **Service Worker** - Uses cache names with embedded version
+- ✅ **Backend** (`table/app/__init__.py`) - Hardcoded `__version__` constant
+- ✅ **Frontend** (`needle/js/app.js`) - Hardcoded `APP_VERSION` constant
+- ✅ **Service Worker** (`needle/service-worker.js`) - Hardcoded cache names
+- ✅ **Docker** (`docker-compose.yml`) - Hardcoded image tag
+
+The frontend **optionally** fetches version from `/api/health` endpoint to verify server/client match, but this is for display/diagnostics only—the embedded version is what's actually used.
 
 ## Cache Management
 

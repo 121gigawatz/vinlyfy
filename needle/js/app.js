@@ -954,8 +954,7 @@ class VinylApp {
 
       // Stop and hide audio player if playing
       if (this.audioPlayer) {
-        this.audioPlayer.stop();
-        this.audioPlayer.hide();
+        this.audioPlayer.hide();  // hide() already pauses the audio
       }
 
       // Hide results section

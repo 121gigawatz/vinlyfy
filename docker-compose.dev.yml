@@ -1,24 +1,18 @@
 version: '3.8'
 
-# Production docker-compose for Vinylfy beta release
-# To use this with the GitHub release:
-# 1. Download the release: https://github.com/121gigawatz/vinlyfy/releases/tag/beta
-# 2. Extract the release tarball
-# 3. Run: docker-compose -f docker-compose.prod.yml up -d
-
 services:
   vinylfy:
     build:
       context: .
       dockerfile: Dockerfile
-    image: vinylfy:beta
+    image: vinylfy:v1.0.0-beta-2.2.2
     container_name: vinylfy
     ports:
       - "${PORT:-8888}:80"
     environment:
       # Backend config
-      - FLASK_ENV=production
-      - DEBUG_MODE=false
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
 
       # File upload settings
@@ -27,13 +21,17 @@ services:
       # File storage
       - FILE_TTL_HOURS=${FILE_TTL_HOURS:-1}
 
-      # CORS Settings (not needed since nginx handles it)
-      - CORS_ORIGINS=http://localhost
-
+      # CORS Settings - set to * to allow all origins since nginx proxies everything from same origin
+      - CORS_ORIGINS=*
+    
     volumes:
+      # Development: mount code for live reload (comment out for production)
+      - ./table/app:/app/table/app
+      - ./needle:/app/needle
+
       # Persistent storage for temp files
       - vinylfy-data:/tmp/vinylfy
-
+    
     restart: unless-stopped
 
     healthcheck:
@@ -42,7 +40,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-
+    
     deploy:
       resources:
         limits:
@@ -51,7 +49,7 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-
+    
     labels:
       - "com.vinylfy.description=Vinylfy application"
       - "com.vinylfy.version=beta"

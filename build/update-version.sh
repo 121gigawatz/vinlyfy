@@ -3,19 +3,27 @@ set -e
 
 # Vinylfy Version Update Script
 # This script updates the version across all files from the centralized version.json
+# Run from project root: ./build/update-version.sh
 
-echo "🔄 Updating Vinylfy version from version.json..."
+# Get the directory where this script lives (build/)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Check if version.json exists
-if [ ! -f "version.json" ]; then
-    echo "❌ Error: version.json not found!"
+echo "🔄 Updating Vinylfy version from build/version.json..."
+
+# Check if version.json exists in build directory
+if [ ! -f "$SCRIPT_DIR/version.json" ]; then
+    echo "❌ Error: version.json not found in build/ directory!"
     exit 1
 fi
 
+# Change to project root
+cd "$PROJECT_ROOT"
+
 # Read version information from version.json
-VERSION=$(grep -oP '"version":\s*"\K[^"]+' version.json)
-SHORT_VERSION=$(grep -oP '"shortVersion":\s*"\K[^"]+' version.json)
-DOCKER_TAG=$(grep -oP '"dockerTag":\s*"\K[^"]+' version.json)
+VERSION=$(grep -oP '"version":\s*"\K[^"]+' "$SCRIPT_DIR/version.json")
+SHORT_VERSION=$(grep -oP '"shortVersion":\s*"\K[^"]+' "$SCRIPT_DIR/version.json")
+DOCKER_TAG=$(grep -oP '"dockerTag":\s*"\K[^"]+' "$SCRIPT_DIR/version.json")
 
 echo "📦 Version: $VERSION"
 echo "📦 Short Version: $SHORT_VERSION"
@@ -42,6 +50,12 @@ echo "  ✅ Updated needle/index.html cache-busting versions"
 sed -i.bak "s/const CACHE_NAME = 'vinylfy-.*';/const CACHE_NAME = 'vinylfy-$SHORT_VERSION';/" needle/service-worker.js
 sed -i.bak "s/const RUNTIME_CACHE = 'vinylfy-runtime-.*';/const RUNTIME_CACHE = 'vinylfy-runtime-$SHORT_VERSION';/" needle/service-worker.js
 echo "  ✅ Updated needle/service-worker.js cache names"
+
+# Update backend __init__.py
+echo ""
+echo "📝 Updating backend files..."
+sed -i.bak "s/__version__ = '.*'/__version__ = '$VERSION'/" table/app/__init__.py
+echo "  ✅ Updated table/app/__init__.py version"
 
 # Update docker-compose.yml - image tag
 echo ""

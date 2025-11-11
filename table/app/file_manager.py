@@ -68,8 +68,13 @@ class ProcessedFileManager:
         stored_filepath = self.files_dir / f"{file_id}.{output_format}"
 
         # Copy file to storage
+        # Try copy2() first (preserves metadata), fallback to copy() if permission denied
         import shutil
-        shutil.copy2(filepath, stored_filepath)
+        try:
+            shutil.copy2(filepath, stored_filepath)
+        except (PermissionError, OSError):
+            # Fallback for Windows mounts or restricted volumes
+            shutil.copy(filepath, stored_filepath)
 
         # Create metadata
         metadata = {

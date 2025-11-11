@@ -10,20 +10,9 @@ of vinyl records including:
 - Mechancial Artifacts like pops
 """
 
-import json
-import os
-
-# Load version from centralized version.json
-_version_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'version.json')
-try:
-    with open(_version_file, 'r') as f:
-        _version_data = json.load(f)
-        __version__ = _version_data['version']
-except Exception as e:
-    # Fallback version if file doesn't exist
-    __version__ = 'v1.0.0 Beta 2.2.2'
-    print(f"Warning: Could not load version from version.json: {e}")
-
+# Version is embedded at build time by update-version script
+# DO NOT modify this manually - use: python3 update-version.py
+__version__ = 'v1.0.0 Beta 2.2.2'
 __author__ = 'Vinylfy by Brett Watz'
 
 from .main import create_app

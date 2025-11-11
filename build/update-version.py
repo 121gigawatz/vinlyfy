@@ -2,6 +2,8 @@
 """
 Vinylfy Version Update Script
 Updates the version across all files from the centralized version.json
+
+Run from project root: python3 build/update-version.py
 """
 
 import json
@@ -11,10 +13,13 @@ from pathlib import Path
 
 def load_version():
     """Load version information from version.json"""
-    version_file = Path(__file__).parent / 'version.json'
+    # Script is in build/, version.json is also in build/
+    script_dir = Path(__file__).parent
+    version_file = script_dir / 'version.json'
 
     if not version_file.exists():
-        print("❌ Error: version.json not found!")
+        print("❌ Error: version.json not found in build/ directory!")
+        print(f"   Looking for: {version_file}")
         exit(1)
 
     with open(version_file, 'r') as f:
@@ -22,11 +27,15 @@ def load_version():
 
 def update_file(file_path, patterns):
     """Update a file with multiple regex patterns"""
-    if not os.path.exists(file_path):
+    # file_path is relative to project root
+    project_root = Path(__file__).parent.parent
+    full_path = project_root / file_path
+
+    if not full_path.exists():
         print(f"  ⚠️  File not found: {file_path}")
         return False
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(full_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
     original_content = content
@@ -35,7 +44,7 @@ def update_file(file_path, patterns):
         content = re.sub(pattern, replacement, content)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(full_path, 'w', encoding='utf-8') as f:
             f.write(content)
         return True
 
@@ -83,6 +92,16 @@ def main():
     ])
     if sw_updated:
         print("  ✅ Updated needle/service-worker.js")
+
+    # Update backend __init__.py
+    print()
+    print("📝 Updating backend files...")
+
+    backend_init_updated = update_file('table/app/__init__.py', [
+        (r"__version__ = '[^']*'", f"__version__ = '{version}'"),
+    ])
+    if backend_init_updated:
+        print("  ✅ Updated table/app/__init__.py")
 
     # Update Docker configuration
     print()
