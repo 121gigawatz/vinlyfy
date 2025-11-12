@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 2.2.2';
+const APP_VERSION = 'v1.0.0 Beta 2.2.3.1';
 
-import api from './api.js?v=beta2.2.2';
-import AudioPlayer from './audio-player.js?v=beta2.2.2';
+import api from './api.js?v=beta2.2.3.1';
+import AudioPlayer from './audio-player.js?v=beta2.2.3.1';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,7 +16,7 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.2.2';
+} from './utils.js?v=beta2.2.3.1';
 
 class VinylApp {
   constructor() {
@@ -267,7 +267,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.2.2';
+      const currentVersion = 'beta2.2.3.1';
 
       // Clear browser caches
       if ('caches' in window) {
