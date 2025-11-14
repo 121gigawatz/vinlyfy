@@ -1,6 +1,3 @@
-# Build-time only files - don't include in Docker image
-build/
-
 # Documentation
 docs/
 *.md

@@ -1,6 +1,16 @@
 {
+  "v1.0.0 Beta 2.4.1": {
+    "date": "2025-11-14",
+    "highlights": [
+      "Improved build and deployment workflow with automated version management."
+    ],
+    "improvements": [
+      "Version updates now happen automatically during Docker builds.",
+      "Simplified deployment process for maintainers."
+    ]
+  },
   "v1.0.0 Beta 2.4": {
-    "date": "",
+    "date": "2025-11-14",
     "highlights": [
       "Metadata support has arrived! Now you can view, edit, or modify your audio metadata within Vinylfy!",
       "Check out our new metadata editor in the process audio section.",

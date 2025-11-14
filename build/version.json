@@ -1,7 +1,7 @@
 {
-  "version": "v1.0.0 Beta 2.4",
-  "shortVersion": "beta2.4",
-  "dockerTag": "v1.0.0-beta-2.4",
+  "version": "v1.0.0 Beta 2.4.1",
+  "shortVersion": "beta2.4.1",
+  "dockerTag": "v1.0.0-beta-2.4.1",
   "buildDate": "2025-11-14",
-  "description": "Added support for metadata handling."
+  "description": "Improved build and deployment workflow."
 }

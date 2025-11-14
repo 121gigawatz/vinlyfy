@@ -41,11 +41,17 @@ WORKDIR /app
 COPY --from=python:3.11-slim /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=python:3.11-slim /usr/local/bin /usr/local/bin
 
+# Copy build scripts and version file
+COPY build /app/build
+
 # Copy backend applicaton
 COPY table/app /app/table/app
 
 # Copy frontend application
 COPY needle /app/needle
+
+# Run version update script to sync all version strings
+RUN python3 /app/build/update-version.py
 
 # Create non-root user
 RUN useradd -m -u 1000 vinylfy && \
