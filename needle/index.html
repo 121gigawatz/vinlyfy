@@ -24,10 +24,10 @@
   <title>Vinylfy</title>
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="/css/variables.css?v=beta2.3.1">
-  <link rel="stylesheet" href="/css/base.css?v=beta2.3.1">
-  <link rel="stylesheet" href="/css/components.css?v=beta2.3.1">
-  <link rel="stylesheet" href="/css/responsive.css?v=beta2.3.1">
+  <link rel="stylesheet" href="/css/variables.css?v=beta2.4">
+  <link rel="stylesheet" href="/css/base.css?v=beta2.4">
+  <link rel="stylesheet" href="/css/components.css?v=beta2.4">
+  <link rel="stylesheet" href="/css/responsive.css?v=beta2.4">
 </head>
 <body>
   <!-- Header -->
@@ -373,10 +373,13 @@
             <button id="previewBtn" class="btn btn-secondary btn-lg">
               🎧 Preview
             </button>
+            <button id="metadataBtn" class="btn btn-secondary btn-lg" title="View and edit audio metadata (MP3 only)">
+              🏷️ Metadata
+            </button>
             <button id="downloadBtn" class="btn btn-primary btn-lg">
               ⬇ Download
             </button>
-            <button id="discardBtn" class="btn btn-ghost btn-lg" style="border: 1px solid var(--color-error);">
+            <button id="discardBtn" class="btn btn-ghost btn-lg" style="border: 1px solid var(--color-border);">
               🗑️ Discard
             </button>
           </div>
@@ -532,7 +535,108 @@
     </div>
   </div>
 
+  <!-- Metadata Modal -->
+  <div id="metadataModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 style="color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: var(--space-xs);">
+          <span>🏷️</span>
+          <span>Audio Metadata</span>
+        </h3>
+      </div>
+      <div class="modal-body">
+        <!-- Metadata Notice -->
+        <div id="metadataNotice" class="alert alert-warning hidden">
+          <strong>Note:</strong> Metadata editing is only available for MP3, FLAC, and AAC formats. Current format does not support metadata writing.
+        </div>
+
+        <!-- View Mode -->
+        <div id="metadataViewMode">
+          <!-- Album Artwork -->
+          <div id="albumArtworkSection" class="hidden" style="margin-bottom: var(--space-lg);">
+            <h4 style="color: var(--color-text-primary); margin-bottom: var(--space-sm); font-size: var(--font-size-md);">Album Artwork</h4>
+            <div style="display: flex; justify-content: center;">
+              <img id="albumArtwork" style="max-width: 200px; max-height: 200px; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); border: 1px solid var(--color-border);" alt="Album artwork">
+            </div>
+          </div>
+
+          <!-- Metadata Fields -->
+          <div style="display: grid; gap: var(--space-md);">
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Title</label>
+                <input type="text" id="metaTitle" class="form-input" placeholder="No title" readonly>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Artist</label>
+                <input type="text" id="metaArtist" class="form-input" placeholder="No artist" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Album</label>
+                <input type="text" id="metaAlbum" class="form-input" placeholder="No album" readonly>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Year</label>
+                <input type="text" id="metaYear" class="form-input" placeholder="No year" readonly>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Genre</label>
+                <input type="text" id="metaGenre" class="form-input" placeholder="No genre" readonly>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Track Number</label>
+                <input type="text" id="metaTrack" class="form-input" placeholder="No track number" readonly>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Comment</label>
+              <textarea id="metaComment" class="form-textarea" rows="2" placeholder="No comment" readonly></textarea>
+            </div>
+          </div>
+
+          <!-- Album Artwork Upload (Edit Mode) -->
+          <div id="artworkUploadSection" class="hidden" style="margin-top: var(--space-md);">
+            <label class="form-label">Album Artwork</label>
+            <div class="file-upload">
+              <input type="file" id="artworkFile" accept="image/jpeg,image/png" style="display: none;">
+              <label for="artworkFile" class="file-upload-label" style="min-height: 120px; cursor: pointer;">
+                <span class="file-upload-icon">🖼️</span>
+                <span class="file-upload-text">Click to upload album artwork</span>
+                <span class="file-upload-hint">JPEG or PNG (recommended: 500x500px)</span>
+              </label>
+            </div>
+            <div id="artworkPreview" class="hidden" style="margin-top: var(--space-sm); text-align: center;">
+              <img id="artworkPreviewImg" style="max-width: 150px; max-height: 150px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--color-border);" alt="Artwork preview">
+              <button id="removeArtwork" class="btn btn-ghost btn-sm" style="display: block; margin: var(--space-sm) auto 0;">Remove Artwork</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; gap: var(--space-sm);">
+        <button id="closeMetadataModal" class="btn btn-ghost">
+          Close
+        </button>
+        <div style="display: flex; gap: var(--space-sm);">
+          <button id="editMetadataBtn" class="btn btn-secondary">
+            Modify Metadata
+          </button>
+          <button id="saveMetadataBtn" class="btn btn-primary hidden">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
-  <script type="module" src="/js/app.js?v=beta2.3.1"></script>
+  <script type="module" src="/js/app.js?v=beta2.4"></script>
 </body>
 </html>

@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 2.3.1';
+const APP_VERSION = 'v1.0.0 Beta 2.4';
 
-import api from './api.js?v=beta2.3.1';
-import AudioPlayer from './audio-player.js?v=beta2.3.1';
+import api from './api.js?v=beta2.4';
+import AudioPlayer from './audio-player.js?v=beta2.4';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,7 +16,13 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.3.1';
+} from './utils.js?v=beta2.4';
+import {
+  extractMetadata,
+  writeMetadata,
+  getEmptyMetadata,
+  supportsMetadataWriting
+} from './metadata.js?v=beta2.4';
 
 class VinylApp {
   constructor() {
@@ -31,6 +37,12 @@ class VinylApp {
     this.appVersion = APP_VERSION;
     this.fileTTL = 1; // Default, will be updated from API
     this.maxUploadMB = 25; // Default, will be updated from API
+
+    // Metadata handling
+    this.originalMetadata = null;
+    this.editedMetadata = null;
+    this.isMetadataEditMode = false;
+    this.uploadedArtwork = null;
 
     this.init();
   }
@@ -64,6 +76,7 @@ class VinylApp {
     this.setupProcessButton();
     this.setupThemeToggle();
     this.setupGitHubStars();
+    this.setupMetadataModal();
 
     // Initialize audio player
     this.audioPlayer = new AudioPlayer('audioPlayerContainer');
@@ -338,7 +351,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.3.1';
+      const currentVersion = 'beta2.4';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -525,6 +538,11 @@ class VinylApp {
     fileSize.textContent = formatFileSize(file.size);
     fileInfo.classList.remove('hidden');
 
+    // Reset metadata when new file is selected
+    this.originalMetadata = null;
+    this.editedMetadata = null;
+    this.uploadedArtwork = null;
+
     document.getElementById('processBtn').disabled = false;
 
     showToast('File loaded successfully!', 'success');
@@ -608,11 +626,28 @@ class VinylApp {
    */
   setupFormatSelector() {
     const formatSelector = document.getElementById('formatSelector');
-    
+
     formatSelector.addEventListener('change', (e) => {
       this.outputFormat = e.target.value;
+      this.updateMetadataButtonState();
       this.savePreferences();
     });
+  }
+
+  /**
+   * Update metadata button state based on selected format
+   */
+  updateMetadataButtonState() {
+    const metadataBtn = document.getElementById('metadataBtn');
+    if (!metadataBtn) return;
+
+    if (supportsMetadataWriting(this.outputFormat)) {
+      metadataBtn.disabled = false;
+      metadataBtn.title = 'View and edit audio metadata';
+    } else {
+      metadataBtn.disabled = true;
+      metadataBtn.title = `Metadata is only supported for MP3, FLAC, and AAC formats. Current format: ${this.outputFormat.toUpperCase()}`;
+    }
   }
 
   /**
@@ -881,6 +916,231 @@ class VinylApp {
   }
 
   /**
+   * Setup metadata modal
+   */
+  setupMetadataModal() {
+    const metadataBtn = document.getElementById('metadataBtn');
+    const metadataModal = document.getElementById('metadataModal');
+    const closeMetadataModal = document.getElementById('closeMetadataModal');
+    const editMetadataBtn = document.getElementById('editMetadataBtn');
+    const saveMetadataBtn = document.getElementById('saveMetadataBtn');
+    const artworkFile = document.getElementById('artworkFile');
+    const removeArtwork = document.getElementById('removeArtwork');
+
+    // Open modal
+    metadataBtn.addEventListener('click', async () => {
+      await this.openMetadataModal();
+    });
+
+    // Close modal
+    closeMetadataModal.addEventListener('click', () => {
+      metadataModal.classList.add('hidden');
+      this.resetMetadataEditMode();
+    });
+
+    // Close on overlay click
+    const modalOverlay = metadataModal.querySelector('.modal-overlay');
+    modalOverlay.addEventListener('click', () => {
+      metadataModal.classList.add('hidden');
+      this.resetMetadataEditMode();
+    });
+
+    // Edit metadata button
+    editMetadataBtn.addEventListener('click', () => {
+      this.enableMetadataEditMode();
+    });
+
+    // Save metadata button
+    saveMetadataBtn.addEventListener('click', () => {
+      this.saveMetadataChanges();
+    });
+
+    // Artwork upload
+    artworkFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.handleArtworkUpload(file);
+      }
+    });
+
+    // Remove artwork
+    removeArtwork.addEventListener('click', () => {
+      this.uploadedArtwork = null;
+      document.getElementById('artworkPreview').classList.add('hidden');
+      document.getElementById('artworkFile').value = '';
+    });
+  }
+
+  /**
+   * Open metadata modal and load metadata from uploaded file
+   */
+  async openMetadataModal() {
+    const metadataModal = document.getElementById('metadataModal');
+    const metadataNotice = document.getElementById('metadataNotice');
+
+    // Check if output format is MP3
+    if (!supportsMetadataWriting(this.outputFormat)) {
+      metadataNotice.classList.remove('hidden');
+    } else {
+      metadataNotice.classList.add('hidden');
+    }
+
+    // Extract metadata from uploaded file if we haven't already
+    if (!this.originalMetadata && this.selectedFile) {
+      try {
+        showToast('Extracting metadata...', 'info');
+        this.originalMetadata = await extractMetadata(this.selectedFile);
+        this.editedMetadata = { ...this.originalMetadata };
+        console.log('Metadata extracted:', this.originalMetadata);
+      } catch (error) {
+        console.error('Failed to extract metadata:', error);
+        this.originalMetadata = getEmptyMetadata();
+        this.editedMetadata = { ...this.originalMetadata };
+      }
+    }
+
+    // Populate modal with metadata
+    this.populateMetadataModal();
+
+    // Show modal
+    metadataModal.classList.remove('hidden');
+  }
+
+  /**
+   * Populate metadata modal with current metadata
+   */
+  populateMetadataModal() {
+    const metadata = this.editedMetadata || this.originalMetadata || getEmptyMetadata();
+
+    // Populate text fields
+    document.getElementById('metaTitle').value = metadata.title || '';
+    document.getElementById('metaArtist').value = metadata.artist || '';
+    document.getElementById('metaAlbum').value = metadata.album || '';
+    document.getElementById('metaYear').value = metadata.year || '';
+    document.getElementById('metaGenre').value = metadata.genre || '';
+    document.getElementById('metaTrack').value = metadata.track || '';
+    document.getElementById('metaComment').value = metadata.comment || '';
+
+    // Show album artwork if available
+    const albumArtworkSection = document.getElementById('albumArtworkSection');
+    const albumArtwork = document.getElementById('albumArtwork');
+
+    if (metadata.picture && metadata.picture.data) {
+      const { data, format } = metadata.picture;
+      const blob = new Blob([new Uint8Array(data)], { type: format });
+      const url = URL.createObjectURL(blob);
+      albumArtwork.src = url;
+      albumArtworkSection.classList.remove('hidden');
+    } else {
+      albumArtworkSection.classList.add('hidden');
+    }
+  }
+
+  /**
+   * Enable metadata edit mode
+   */
+  enableMetadataEditMode() {
+    this.isMetadataEditMode = true;
+
+    // Enable all input fields
+    document.getElementById('metaTitle').removeAttribute('readonly');
+    document.getElementById('metaArtist').removeAttribute('readonly');
+    document.getElementById('metaAlbum').removeAttribute('readonly');
+    document.getElementById('metaYear').removeAttribute('readonly');
+    document.getElementById('metaGenre').removeAttribute('readonly');
+    document.getElementById('metaTrack').removeAttribute('readonly');
+    document.getElementById('metaComment').removeAttribute('readonly');
+
+    // Show save button, hide edit button
+    document.getElementById('editMetadataBtn').classList.add('hidden');
+    document.getElementById('saveMetadataBtn').classList.remove('hidden');
+
+    // Show artwork upload section if MP3 format
+    if (supportsMetadataWriting(this.outputFormat)) {
+      document.getElementById('artworkUploadSection').classList.remove('hidden');
+    }
+
+    showToast('Edit mode enabled', 'info');
+  }
+
+  /**
+   * Reset metadata edit mode
+   */
+  resetMetadataEditMode() {
+    this.isMetadataEditMode = false;
+
+    // Make fields readonly
+    document.getElementById('metaTitle').setAttribute('readonly', true);
+    document.getElementById('metaArtist').setAttribute('readonly', true);
+    document.getElementById('metaAlbum').setAttribute('readonly', true);
+    document.getElementById('metaYear').setAttribute('readonly', true);
+    document.getElementById('metaGenre').setAttribute('readonly', true);
+    document.getElementById('metaTrack').setAttribute('readonly', true);
+    document.getElementById('metaComment').setAttribute('readonly', true);
+
+    // Show edit button, hide save button
+    document.getElementById('editMetadataBtn').classList.remove('hidden');
+    document.getElementById('saveMetadataBtn').classList.add('hidden');
+
+    // Hide artwork upload section
+    document.getElementById('artworkUploadSection').classList.add('hidden');
+  }
+
+  /**
+   * Save metadata changes
+   */
+  saveMetadataChanges() {
+    // Get values from form
+    this.editedMetadata = {
+      title: document.getElementById('metaTitle').value,
+      artist: document.getElementById('metaArtist').value,
+      album: document.getElementById('metaAlbum').value,
+      year: document.getElementById('metaYear').value,
+      genre: document.getElementById('metaGenre').value,
+      track: document.getElementById('metaTrack').value,
+      comment: document.getElementById('metaComment').value,
+      picture: this.uploadedArtwork || (this.originalMetadata && this.originalMetadata.picture) || null
+    };
+
+    console.log('Metadata saved:', this.editedMetadata);
+    showToast('Metadata changes saved!', 'success');
+
+    this.resetMetadataEditMode();
+    document.getElementById('metadataModal').classList.add('hidden');
+  }
+
+  /**
+   * Handle artwork upload
+   */
+  async handleArtworkUpload(file) {
+    if (!file.type.match(/^image\/(jpeg|png)$/)) {
+      showToast('Please upload a JPEG or PNG image', 'error');
+      return;
+    }
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      this.uploadedArtwork = {
+        data: new Uint8Array(arrayBuffer),
+        format: file.type
+      };
+
+      // Show preview
+      const artworkPreview = document.getElementById('artworkPreview');
+      const artworkPreviewImg = document.getElementById('artworkPreviewImg');
+      const blob = new Blob([arrayBuffer], { type: file.type });
+      const url = URL.createObjectURL(blob);
+      artworkPreviewImg.src = url;
+      artworkPreview.classList.remove('hidden');
+
+      showToast('Artwork uploaded successfully', 'success');
+    } catch (error) {
+      console.error('Failed to upload artwork:', error);
+      showToast('Failed to upload artwork', 'error');
+    }
+  }
+
+  /**
    * Process audio file
    */
   async processAudio() {
@@ -969,6 +1229,9 @@ class VinylApp {
     // Setup discard button
     discardBtn.onclick = () => this.discardAudio(result.file_id);
 
+    // Update metadata button state
+    this.updateMetadataButtonState();
+
     // Show results section
     resultsSection.classList.remove('hidden');
     resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -995,7 +1258,21 @@ class VinylApp {
       downloadBtn.disabled = true;
       downloadBtn.innerHTML = '<span class="spinner spinner-sm"></span> Downloading...';
 
-      const { blob, filename } = await api.downloadFile(fileId);
+      let { blob, filename } = await api.downloadFile(fileId);
+
+      // If format supports metadata and we have edited metadata, write it to the file
+      if (supportsMetadataWriting(this.outputFormat) && this.editedMetadata) {
+        try {
+          downloadBtn.innerHTML = '<span class="spinner spinner-sm"></span> Adding metadata...';
+          console.log(`Writing metadata to ${this.outputFormat.toUpperCase()} file...`);
+          blob = await writeMetadata(blob, this.editedMetadata, this.outputFormat);
+          showToast('Metadata added to file! 🏷️', 'success');
+        } catch (error) {
+          console.error('Failed to write metadata:', error);
+          showToast('Warning: Failed to add metadata to file', 'warning');
+          // Continue with download even if metadata writing fails
+        }
+      }
 
       // Create download link
       const url = URL.createObjectURL(blob);
@@ -1053,6 +1330,11 @@ class VinylApp {
 
       // Clear processed file ID
       this.processedFileId = null;
+
+      // Reset metadata
+      this.originalMetadata = null;
+      this.editedMetadata = null;
+      this.uploadedArtwork = null;
 
       // Scroll back to top
       window.scrollTo({ top: 0, behavior: 'smooth' });

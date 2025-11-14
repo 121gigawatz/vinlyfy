@@ -1,4 +1,18 @@
 {
+  "v1.0.0 Beta 2.4": {
+    "date": "",
+    "highlights": [
+      "Metadata support has arrived! Now you can view, edit, or modify your audio metadata within Vinylfy!",
+      "Check out our new metadata editor in the process audio section.",
+      "Note: Metadata editing is not supported in OGG and WAV formats."
+    ],
+    "bugfixes": [
+      "Small UI fixes."
+    ],
+    "improvements": [
+      "More consistent spacing between cards on mobile and desktop views."
+    ]
+  },
   "v1.0.0 Beta 2.3.1": {
     "date": "2025-11-14",
     "highlights": [
