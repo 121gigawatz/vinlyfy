@@ -1,4 +1,10 @@
 {
+  "v.1.0.0 Beta 2.3.1": {
+    "date": "2025-11-14",
+    "highlights": [
+      "Hotfix for portrait mode on mobile devices."
+    ]
+  },
   "v1.0.0 Beta 2.3": {
     "date": "2025-11-13",
     "highlights": [
