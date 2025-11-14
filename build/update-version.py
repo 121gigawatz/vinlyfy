@@ -81,6 +81,7 @@ def main():
     index_html_updated = update_file('needle/index.html', [
         (r'\.css\?v=[^"]*"', f'.css?v={short_version}"'),
         (r'\.js\?v=[^"]*"', f'.js?v={short_version}"'),
+        (r'<p id="appVersion"[^>]*>\s*Version:[^<]*', f'<p id="appVersion" style="font-size: var(--font-size-sm); color: var(--color-primary); font-weight: var(--font-weight-light); margin-bottom: var(--space-sm);">\n        Version: {version}'),
     ])
     if index_html_updated:
         print("  ✅ Updated needle/index.html")
