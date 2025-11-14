@@ -1,5 +1,6 @@
-const CACHE_NAME = 'vinylfy-beta2.4';
-const RUNTIME_CACHE = 'vinylfy-runtime-beta2.4';
+const CACHE_NAME = 'vinylfy-beta2.4.3';
+const RUNTIME_CACHE = 'vinylfy-runtime-beta2.4.3';
+const VERSION = 'v1.0.0 Beta 2.4.3';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -13,34 +14,37 @@ const PRECACHE_ASSETS = [
   '/js/api.js',
   '/js/audio-player.js',
   '/js/utils.js',
+  '/js/metadata.js',
   '/manifest.json',
   '/release-notes.json'
 ];
 
 // Install event - cache essential assets
 self.addEventListener('install', (event) => {
-  console.log('[Service Worker] Installing...');
-  
+  console.log('[Service Worker] Installing version:', VERSION);
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[Service Worker] Precaching assets');
+        console.log('[Service Worker] Caching app shell');
         return cache.addAll(PRECACHE_ASSETS);
       })
       .then(() => {
-        console.log('[Service Worker] Installed successfully');
-        return self.skipWaiting(); // Activate immediately
+        console.log('[Service Worker] Install complete');
+        // Force the waiting service worker to become the active service worker
+        return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('[Service Worker] Precaching failed:', error);
+        console.error('[Service Worker] Install failed:', error);
+        throw error;
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[Service Worker] Activating...');
-  
+  console.log('[Service Worker] Activating version:', VERSION);
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -48,17 +52,19 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((cacheName) => {
               // Delete old caches
-              return cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE;
+              const isOldCache = cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE;
+              if (isOldCache) {
+                console.log('[Service Worker] Deleting old cache:', cacheName);
+              }
+              return isOldCache;
             })
-            .map((cacheName) => {
-              console.log('[Service Worker] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            })
+            .map((cacheName) => caches.delete(cacheName))
         );
       })
       .then(() => {
         console.log('[Service Worker] Activated successfully');
-        return self.clients.claim(); // Take control immediately
+        // Take control of all pages immediately
+        return self.clients.claim();
       })
   );
 });
@@ -68,12 +74,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Log all fetch requests for debugging
-  console.log('[Service Worker] Fetch:', request.method, url.pathname);
-
   // Skip cross-origin requests
   if (url.origin !== location.origin) {
-    console.log('[Service Worker] Skipping cross-origin:', url.origin);
     return;
   }
 
@@ -81,13 +83,11 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request, {
-        // Add credentials for CORS
         credentials: 'same-origin',
-        // Add timeout handling
         signal: AbortSignal.timeout(30000) // 30 second timeout
       })
         .catch((error) => {
-          console.error('[Service Worker] API fetch failed:', error.name, error.message);
+          console.error('[Service Worker] API fetch failed:', error);
           return new Response(
             JSON.stringify({
               error: 'Network unavailable. Please check your connection.',
@@ -108,7 +108,20 @@ self.addEventListener('fetch', (event) => {
     caches.match(request)
       .then((cachedResponse) => {
         if (cachedResponse) {
-          console.log('[Service Worker] Serving from cache:', request.url);
+          // Return cached response, but also fetch fresh version in background
+          const fetchPromise = fetch(request)
+            .then((response) => {
+              if (response && response.status === 200) {
+                const responseToCache = response.clone();
+                caches.open(RUNTIME_CACHE).then((cache) => {
+                  cache.put(request, responseToCache);
+                });
+              }
+            })
+            .catch(() => {
+              // Ignore network errors when updating cache
+            });
+
           return cachedResponse;
         }
 
@@ -120,10 +133,10 @@ self.addEventListener('fetch', (event) => {
               return response;
             }
 
-            // Clone the response (can only be consumed once)
+            // Clone the response
             const responseToCache = response.clone();
 
-            // Cache the fetched response for future use
+            // Cache the fetched response
             caches.open(RUNTIME_CACHE)
               .then((cache) => {
                 cache.put(request, responseToCache);
@@ -133,12 +146,12 @@ self.addEventListener('fetch', (event) => {
           })
           .catch((error) => {
             console.error('[Service Worker] Fetch failed:', error);
-            
+
             // Return offline page for navigation requests
             if (request.mode === 'navigate') {
               return caches.match('/index.html');
             }
-            
+
             throw error;
           });
       })
@@ -160,23 +173,29 @@ self.addEventListener('message', (event) => {
           cacheNames.map((cacheName) => caches.delete(cacheName))
         );
       }).then(() => {
-        event.ports[0].postMessage({ success: true });
+        if (event.ports && event.ports[0]) {
+          event.ports[0].postMessage({ success: true });
+        }
       })
     );
   }
 
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: CACHE_NAME });
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({
+        version: CACHE_NAME,
+        fullVersion: VERSION
+      });
+    }
   }
 });
 
 // Background sync for offline uploads (future enhancement)
 self.addEventListener('sync', (event) => {
   console.log('[Service Worker] Background sync:', event.tag);
-  
+
   if (event.tag === 'upload-audio') {
     event.waitUntil(
-      // Handle queued uploads when back online
       syncQueuedUploads()
     );
   }
@@ -184,8 +203,6 @@ self.addEventListener('sync', (event) => {
 
 // Helper function for background sync
 async function syncQueuedUploads() {
-  // This would handle any queued audio uploads
-  // For now, just a placeholder
   console.log('[Service Worker] Syncing queued uploads...');
   return Promise.resolve();
 }
@@ -193,7 +210,7 @@ async function syncQueuedUploads() {
 // Push notification support (future enhancement)
 self.addEventListener('push', (event) => {
   console.log('[Service Worker] Push received');
-  
+
   const options = {
     body: event.data ? event.data.text() : 'Your audio is ready!',
     icon: '/assets/icons/icon-192x192.png',
@@ -211,9 +228,9 @@ self.addEventListener('push', (event) => {
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
   console.log('[Service Worker] Notification clicked');
-  
+
   event.notification.close();
-  
+
   event.waitUntil(
     clients.openWindow('/')
   );

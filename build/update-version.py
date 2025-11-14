@@ -90,6 +90,7 @@ def main():
     sw_updated = update_file('needle/service-worker.js', [
         (r"const CACHE_NAME = 'vinylfy-[^']*';", f"const CACHE_NAME = 'vinylfy-{short_version}';"),
         (r"const RUNTIME_CACHE = 'vinylfy-runtime-[^']*';", f"const RUNTIME_CACHE = 'vinylfy-runtime-{short_version}';"),
+        (r"const VERSION = '[^']*';", f"const VERSION = '{version}';"),
     ])
     if sw_updated:
         print("  ✅ Updated needle/service-worker.js")

@@ -1,7 +1,7 @@
 {
-  "version": "v1.0.0 Beta 2.4.1",
-  "shortVersion": "beta2.4.1",
-  "dockerTag": "v1.0.0-beta-2.4.1",
+  "version": "v1.0.0 Beta 2.4.3",
+  "shortVersion": "beta2.4.3",
+  "dockerTag": "v1.0.0-beta-2.4.3",
   "buildDate": "2025-11-14",
-  "description": "Improved build and deployment workflow."
+  "description": "Fix service worker caching issues and add metadata.js to precache."
 }

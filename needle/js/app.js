@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 2.4';
+const APP_VERSION = 'v1.0.0 Beta 2.4.3';
 
-import api from './api.js?v=beta2.4';
-import AudioPlayer from './audio-player.js?v=beta2.4';
+import api from './api.js?v=beta2.4.3';
+import AudioPlayer from './audio-player.js?v=beta2.4.3';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,13 +16,13 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.4';
+} from './utils.js?v=beta2.4.3';
 import {
   extractMetadata,
   writeMetadata,
   getEmptyMetadata,
   supportsMetadataWriting
-} from './metadata.js?v=beta2.4';
+} from './metadata.js?v=beta2.4.3';
 
 class VinylApp {
   constructor() {
@@ -182,8 +182,8 @@ class VinylApp {
     cachedVersionEl.textContent = cachedVersion;
     latestVersionEl.textContent = latestVersion;
 
-    // Load and display release notes
-    await this.loadReleaseNotes(latestVersion);
+    // Load and display release notes for all versions between cached and latest
+    await this.loadReleaseNotes(cachedVersion, latestVersion);
 
     // Show modal
     modal.classList.remove('hidden');
@@ -212,9 +212,9 @@ class VinylApp {
   }
 
   /**
-   * Load and display release notes for the new version
+   * Load and display release notes for all versions between cached and latest
    */
-  async loadReleaseNotes(version) {
+  async loadReleaseNotes(cachedVersion, latestVersion) {
     const releaseNotesSection = document.getElementById('releaseNotesSection');
     const releaseNotesContent = document.getElementById('releaseNotesContent');
 
@@ -226,50 +226,87 @@ class VinylApp {
       }
 
       const releaseNotes = await response.json();
-      const versionNotes = releaseNotes[version];
+      const allVersions = Object.keys(releaseNotes);
 
-      if (versionNotes) {
-        // Build HTML for release notes
+      // Find all versions between cached and latest (inclusive of latest)
+      const versionsToShow = [];
+      let foundLatest = false;
+
+      for (const version of allVersions) {
+        if (version === latestVersion) {
+          foundLatest = true;
+          versionsToShow.push(version);
+        } else if (foundLatest) {
+          versionsToShow.push(version);
+          // Stop when we reach the cached version
+          if (version === cachedVersion) {
+            break;
+          }
+        }
+      }
+
+      // If we only found the latest version (same as cached), just show latest
+      if (versionsToShow.length === 0 && releaseNotes[latestVersion]) {
+        versionsToShow.push(latestVersion);
+      }
+
+      if (versionsToShow.length > 0) {
         let html = '';
 
-        // Add highlights
-        if (versionNotes.highlights && versionNotes.highlights.length > 0) {
-          html += '<div style="margin-bottom: var(--space-sm);">';
-          html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">✨ Highlights:</strong>';
-          html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
-          versionNotes.highlights.forEach(item => {
-            html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-primary);">${item}</li>`;
-          });
-          html += '</ul></div>';
-        }
+        // Show each version's notes
+        versionsToShow.forEach((version, index) => {
+          const versionNotes = releaseNotes[version];
+          if (!versionNotes) return;
 
-        // Add bug fixes
-        if (versionNotes.bugfixes && versionNotes.bugfixes.length > 0) {
-          html += '<div style="margin-bottom: var(--space-sm);">';
-          html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">Bug Fixes:</strong>';
-          html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
-          versionNotes.bugfixes.forEach(item => {
-            html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-secondary);">${item}</li>`;
-          });
-          html += '</ul></div>';
-        }
+          // Add version header
+          if (versionsToShow.length > 1) {
+            html += `<div style="margin-bottom: var(--space-md); ${index > 0 ? 'margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--color-border);' : ''}">`;
+            html += `<h4 style="color: var(--color-primary); margin-bottom: var(--space-sm); font-size: var(--font-size-md);">${version}</h4>`;
+          }
 
-        // Add improvements
-        if (versionNotes.improvements && versionNotes.improvements.length > 0) {
-          html += '<div>';
-          html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">Improvements:</strong>';
-          html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
-          versionNotes.improvements.forEach(item => {
-            html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-secondary);">${item}</li>`;
-          });
-          html += '</ul></div>';
-        }
+          // Add highlights
+          if (versionNotes.highlights && versionNotes.highlights.length > 0) {
+            html += '<div style="margin-bottom: var(--space-sm);">';
+            html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">✨ Highlights:</strong>';
+            html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
+            versionNotes.highlights.forEach(item => {
+              html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-primary);">${item}</li>`;
+            });
+            html += '</ul></div>';
+          }
+
+          // Add bug fixes
+          if (versionNotes.bugfixes && versionNotes.bugfixes.length > 0) {
+            html += '<div style="margin-bottom: var(--space-sm);">';
+            html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">🐛 Bug Fixes:</strong>';
+            html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
+            versionNotes.bugfixes.forEach(item => {
+              html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-secondary);">${item}</li>`;
+            });
+            html += '</ul></div>';
+          }
+
+          // Add improvements
+          if (versionNotes.improvements && versionNotes.improvements.length > 0) {
+            html += '<div style="margin-bottom: var(--space-sm);">';
+            html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">⚡ Improvements:</strong>';
+            html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
+            versionNotes.improvements.forEach(item => {
+              html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-secondary);">${item}</li>`;
+            });
+            html += '</ul></div>';
+          }
+
+          if (versionsToShow.length > 1) {
+            html += '</div>';
+          }
+        });
 
         // Update content and show section
         releaseNotesContent.innerHTML = html;
         releaseNotesSection.style.display = 'block';
       } else {
-        // No release notes found for this version
+        // No release notes found
         releaseNotesSection.style.display = 'none';
       }
     } catch (error) {
@@ -351,7 +388,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.4';
+      const currentVersion = 'beta2.4.3';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -1330,6 +1367,19 @@ class VinylApp {
 
       // Clear processed file ID
       this.processedFileId = null;
+
+      // Clear selected file and file input
+      this.selectedFile = null;
+      const audioFileInput = document.getElementById('audioFile');
+      if (audioFileInput) {
+        audioFileInput.value = '';
+      }
+
+      // Hide file info display
+      const fileInfo = document.getElementById('fileInfo');
+      if (fileInfo) {
+        fileInfo.classList.add('hidden');
+      }
 
       // Reset metadata
       this.originalMetadata = null;

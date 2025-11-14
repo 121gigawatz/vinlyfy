@@ -1,16 +1,25 @@
 {
-  "v1.0.0 Beta 2.4.1": {
+  "v1.0.0 Beta 2.4.3": {
     "date": "2025-11-14",
     "highlights": [
-      "Improved build and deployment workflow with automated version management."
+      "Fixed service worker caching issues that prevented UI from loading properly",
+      "Added metadata.js to service worker precache list",
+      "Resolved turntable status stuck on 'Checking'",
+      "Fixed theme toggle, file upload, and cache clear functionality"
     ],
-    "improvements": [
-      "Version updates now happen automatically during Docker builds.",
-      "Simplified deployment process for maintainers."
+    "bugfixes": [
+      "Service worker now properly caches all JavaScript modules",
+      "Browser cache invalidation now works correctly with new version"
+    ]
+  },
+  "v1.0.0 Beta 2.4.2": {
+    "date": "2025-11-14",
+    "highlights": [
+      "Hotfixes"
     ]
   },
   "v1.0.0 Beta 2.4": {
-    "date": "2025-11-14",
+    "date": "",
     "highlights": [
       "Metadata support has arrived! Now you can view, edit, or modify your audio metadata within Vinylfy!",
       "Check out our new metadata editor in the process audio section.",

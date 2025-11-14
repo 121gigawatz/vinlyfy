@@ -233,18 +233,3 @@ const api = new VinylAPI();
 
 // Export the API instance
 export default api;
-
-// Also export individual methods for convenience
-export const {
-  checkHealth,
-  getPresets,
-  getFormats,
-  processAudio,
-  getPreviewURL,
-  getDownloadURL,
-  getFileInfo,
-  deleteFile,
-  downloadFile,
-  validateSettings,
-  getStats
-} = api;

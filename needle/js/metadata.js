@@ -3,7 +3,22 @@
  * Handles reading and writing audio file metadata (ID3 tags)
  */
 
-import jsmediatags from 'https://cdn.jsdelivr.net/npm/jsmediatags@3.9.5/+esm';
+// Load jsmediatags from UNPKG (browser-compatible build)
+let jsmediatags = null;
+const jsmediatagsReady = (async () => {
+  // Load the script dynamically
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/jsmediatags@3.9.5/dist/jsmediatags.min.js';
+  document.head.appendChild(script);
+
+  // Wait for script to load
+  await new Promise((resolve) => {
+    script.onload = resolve;
+  });
+
+  // Get the global jsmediatags object
+  jsmediatags = window.jsmediatags;
+})();
 
 /**
  * Extract metadata from an audio file
@@ -11,7 +26,10 @@ import jsmediatags from 'https://cdn.jsdelivr.net/npm/jsmediatags@3.9.5/+esm';
  * @returns {Promise<Object>} - Extracted metadata
  */
 export async function extractMetadata(file) {
-  return new Promise((resolve, reject) => {
+  // Ensure jsmediatags is loaded
+  await jsmediatagsReady;
+
+  return new Promise((resolve) => {
     jsmediatags.read(file, {
       onSuccess: (tag) => {
         const tags = tag.tags;
@@ -86,8 +104,8 @@ export async function writeMetadata(audioBlob, metadata, format = 'mp3') {
  * Write MP3 metadata using ID3v2 tags
  */
 async function writeMP3Metadata(audioBlob, metadata) {
-  // Import browser-id3-writer dynamically
-  const { default: ID3Writer } = await import('https://cdn.jsdelivr.net/npm/browser-id3-writer@6.1.0/+esm');
+  // Import browser-id3-writer dynamically (v6 uses named export, not default)
+  const { ID3Writer } = await import('https://cdn.jsdelivr.net/npm/browser-id3-writer@6.1.0/dist/browser-id3-writer.mjs');
 
   // Convert blob to ArrayBuffer
   const arrayBuffer = await audioBlob.arrayBuffer();
@@ -116,13 +134,14 @@ async function writeMP3Metadata(audioBlob, metadata) {
     });
   }
 
-  // Add "Processed by Vinylfy" tag
-  writer.setFrame('TENC', 'Vinylfy - https://github.com/121gigawatz/vinylfy');
+  // Note: TENC frame (Encoded by) is not supported by browser-id3-writer
+  // Skipping "Processed by Vinylfy" tag for MP3
 
   writer.addTag();
 
-  // Return new blob with metadata
-  return new Blob([writer.arrayBuffer], { type: audioBlob.type });
+  // Use getBlob() method instead of manually creating blob
+  // This ensures proper handling of the tagged audio data
+  return writer.getBlob();
 }
 
 /**

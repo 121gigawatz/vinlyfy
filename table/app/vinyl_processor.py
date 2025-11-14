@@ -232,8 +232,42 @@ class VinylProcessor:
                         channels=1
                     )
 
-                # Export to desired format
-                audio_segment.export(output_path, format=output_format)
+                # Export to desired format with proper parameters to ensure correct duration metadata
+                fmt = output_format.lower()
+                if fmt == 'mp3':
+                    # For MP3, use CBR (Constant Bit Rate) to avoid duration issues with VBR
+                    audio_segment.export(
+                        output_path,
+                        format=output_format,
+                        bitrate="320k",
+                        parameters=["-q:a", "0"]  # Highest quality
+                    )
+                elif fmt == 'flac':
+                    # FLAC with highest compression
+                    audio_segment.export(
+                        output_path,
+                        format=output_format,
+                        parameters=["-compression_level", "12"]
+                    )
+                elif fmt == 'aac':
+                    # AAC uses 'adts' format for raw AAC streams
+                    audio_segment.export(
+                        output_path,
+                        format='adts',
+                        bitrate="256k",
+                        codec='aac'
+                    )
+                elif fmt == 'm4a':
+                    # M4A uses 'ipod' format (MP4 container)
+                    audio_segment.export(
+                        output_path,
+                        format='ipod',
+                        bitrate="256k",
+                        codec='aac'
+                    )
+                else:
+                    # Other formats (OGG, etc.)
+                    audio_segment.export(output_path, format=output_format)
                 logger.info(f"Saved audio to {output_path} as {output_format.upper()}")
 
         except Exception as e:
