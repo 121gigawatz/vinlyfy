@@ -1,0 +1,62 @@
+{
+  "v1.0.0 Beta 2.3": {
+    "date": "2025-11-13",
+    "highlights": [
+      "Vinylfy continues to improve with new features and fixes!"
+    ],
+    "bugfixes": [
+      "Fixed alignment issue with Turntable status in portrait mode on modile devices."
+    ],
+    "improvements": [
+      "Add release notes to the notification modal after a new release.",
+      "The How It Works section is now accessible via the '?' button in the preset selection area.",
+      "Adjusted spacing in the settings section for better layout."
+    ]
+  },
+  "v1.0.0 Beta 2.2.3.1": {
+    "date": "2025-11-11",
+    "highlights": [
+      "Fixed discard button error when removing processed files",
+      "Fixed preset validation - 'AJW Recommended' now works correctly",
+      "Fixed file storage permissions for Windows network mounts",
+      "Improved mobile header layout in portrait mode"
+    ],
+    "bugfixes": [
+      "Resolved audioPlayer.stop() undefined function error",
+      "Fixed case-sensitive preset name matching",
+      "Added fallback for file metadata preservation on restricted volumes"
+    ],
+    "improvements": [
+      "Better responsive design for turntable status on mobile",
+      "Enhanced error handling for file operations"
+    ]
+  },
+  "v1.0.0 Beta 2.2.2": {
+    "date": "2025-11-09",
+    "highlights": [
+      "Added cache version mismatch detection",
+      "Centralized version management system",
+      "GitHub star counter in header"
+    ],
+    "bugfixes": [
+      "Fixed service worker cache issues",
+      "Improved mobile Chrome connection reliability"
+    ],
+    "improvements": [
+      "Better cache management",
+      "Improved error messages"
+    ]
+  },
+  "v1.0.0 Beta 2.2.1": {
+    "date": "2025-11-08",
+    "highlights": [
+      "Reordered vinyl presets with 'AJW Recommended' as default",
+      "Updated output format labels for better clarity",
+      "Added processing icon to Process Audio button"
+    ],
+    "improvements": [
+      "Enhanced UX with better preset ordering",
+      "Improved format descriptions"
+    ]
+  }
+}

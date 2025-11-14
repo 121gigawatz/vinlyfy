@@ -441,6 +441,21 @@
   .btn-group .btn {
     width: 100%;
   }
+
+  /* Make header controls wrap and center on mobile */
+  .app-header .flex {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Center align health status badge on mobile */
+  #healthStatus {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
 }
 
 /* Safe area insets for notched devices (iPhone X, etc) */

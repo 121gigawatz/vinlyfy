@@ -1,5 +1,5 @@
-const CACHE_NAME = 'vinylfy-beta2.2.3.1';
-const RUNTIME_CACHE = 'vinylfy-runtime-beta2.2.3.1';
+const CACHE_NAME = 'vinylfy-beta2.2.3';
+const RUNTIME_CACHE = 'vinylfy-runtime-beta2.2.3';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -13,7 +13,8 @@ const PRECACHE_ASSETS = [
   '/js/api.js',
   '/js/audio-player.js',
   '/js/utils.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/release-notes.json'
 ];
 
 // Install event - cache essential assets

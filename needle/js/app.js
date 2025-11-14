@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 2.2.3.1';
+const APP_VERSION = 'v1.0.0 Beta 2.3';
 
-import api from './api.js?v=beta2.2.3.1';
-import AudioPlayer from './audio-player.js?v=beta2.2.3.1';
+import api from './api.js?v=beta2.2.3';
+import AudioPlayer from './audio-player.js?v=beta2.2.3';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,7 +16,7 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.2.3.1';
+} from './utils.js?v=beta2.2.3';
 
 class VinylApp {
   constructor() {
@@ -158,7 +158,7 @@ class VinylApp {
   /**
    * Show cache update modal
    */
-  showCacheUpdateModal(cachedVersion, latestVersion) {
+  async showCacheUpdateModal(cachedVersion, latestVersion) {
     const modal = document.getElementById('cacheUpdateModal');
     const cachedVersionEl = document.getElementById('cachedVersion');
     const latestVersionEl = document.getElementById('latestVersion');
@@ -168,6 +168,9 @@ class VinylApp {
     // Set version info
     cachedVersionEl.textContent = cachedVersion;
     latestVersionEl.textContent = latestVersion;
+
+    // Load and display release notes
+    await this.loadReleaseNotes(latestVersion);
 
     // Show modal
     modal.classList.remove('hidden');
@@ -193,6 +196,74 @@ class VinylApp {
     overlay.onclick = () => {
       modal.classList.add('hidden');
     };
+  }
+
+  /**
+   * Load and display release notes for the new version
+   */
+  async loadReleaseNotes(version) {
+    const releaseNotesSection = document.getElementById('releaseNotesSection');
+    const releaseNotesContent = document.getElementById('releaseNotesContent');
+
+    try {
+      // Fetch release notes
+      const response = await fetch('/release-notes.json');
+      if (!response.ok) {
+        throw new Error('Failed to fetch release notes');
+      }
+
+      const releaseNotes = await response.json();
+      const versionNotes = releaseNotes[version];
+
+      if (versionNotes) {
+        // Build HTML for release notes
+        let html = '';
+
+        // Add highlights
+        if (versionNotes.highlights && versionNotes.highlights.length > 0) {
+          html += '<div style="margin-bottom: var(--space-sm);">';
+          html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">✨ Highlights:</strong>';
+          html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
+          versionNotes.highlights.forEach(item => {
+            html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-primary);">${item}</li>`;
+          });
+          html += '</ul></div>';
+        }
+
+        // Add bug fixes
+        if (versionNotes.bugfixes && versionNotes.bugfixes.length > 0) {
+          html += '<div style="margin-bottom: var(--space-sm);">';
+          html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">Bug Fixes:</strong>';
+          html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
+          versionNotes.bugfixes.forEach(item => {
+            html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-secondary);">${item}</li>`;
+          });
+          html += '</ul></div>';
+        }
+
+        // Add improvements
+        if (versionNotes.improvements && versionNotes.improvements.length > 0) {
+          html += '<div>';
+          html += '<strong style="color: var(--color-primary); font-size: var(--font-size-sm);">Improvements:</strong>';
+          html += '<ul style="margin: var(--space-xs) 0 0 0; padding-left: var(--space-lg); font-size: var(--font-size-sm);">';
+          versionNotes.improvements.forEach(item => {
+            html += `<li style="margin-bottom: var(--space-xs); color: var(--color-text-secondary);">${item}</li>`;
+          });
+          html += '</ul></div>';
+        }
+
+        // Update content and show section
+        releaseNotesContent.innerHTML = html;
+        releaseNotesSection.style.display = 'block';
+      } else {
+        // No release notes found for this version
+        releaseNotesSection.style.display = 'none';
+      }
+    } catch (error) {
+      console.warn('Could not load release notes:', error);
+      // Hide section if there's an error
+      releaseNotesSection.style.display = 'none';
+    }
   }
 
   /**
@@ -267,7 +338,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.2.3.1';
+      const currentVersion = 'beta2.2.3';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -414,6 +485,25 @@ class VinylApp {
       if (file) {
         this.handleFileSelect(file);
       }
+    });
+
+    // How It Works button
+    const howItWorksBtn = document.getElementById('howItWorksBtn');
+    const howItWorksModal = document.getElementById('howItWorksModal');
+    const closeHowItWorksBtn = document.getElementById('closeHowItWorksModal');
+
+    howItWorksBtn.addEventListener('click', () => {
+      howItWorksModal.classList.remove('hidden');
+    });
+
+    closeHowItWorksBtn.addEventListener('click', () => {
+      howItWorksModal.classList.add('hidden');
+    });
+
+    // Close modal on overlay click
+    const howItWorksOverlay = howItWorksModal.querySelector('.modal-overlay');
+    howItWorksOverlay.addEventListener('click', () => {
+      howItWorksModal.classList.add('hidden');
     });
   }
 
