@@ -106,6 +106,15 @@ export function showToast(message, type = 'info', duration = 3000) {
     toast.style.animation = 'fadeOut 0.3s ease-out';
     setTimeout(() => toast.remove(), 300);
   }, duration);
+
+  const liveRegion = document.getElementById('aria-live-region');
+  if (liveRegion) {
+    liveRegion.textContent = message;
+    // Clear after announcement to allow repeat messages
+    setTimeout(() => {
+      liveRegion.textContent= "";
+    }, 1000);
+  }
 }
 
 // Copy to clipboard

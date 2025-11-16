@@ -80,6 +80,19 @@ class VinylApp {
 
     // Initialize audio player
     this.audioPlayer = new AudioPlayer('audioPlayerContainer');
+    this.audioPlayer.innerHTML = `<div class="audio-player" role="group" aria-label="Audio player controls">
+        <div class="audio-controls">
+          <button class "audio-play-btn" id="${this.id}-play-btn" aria-label="Play audio" aria-pressed="fasle">
+            ▶
+          </button>
+          <div class="audio-timeline" id="${this.id}-timeline" aria-label="Audio timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0 seconds of 0 seconds" tabindex="0">
+          </div>
+        </div>
+        <div class="audio-time" aria-live="off">
+          <span id="${this.id}-current-time" aria-label="Current time">0:00</span>
+          <span id="${this.id}-duration" aria-label="Duration">0.00</span>
+        </div>
+      `;
     this.audioPlayer.hide();
 
     // Setup PWA
@@ -87,7 +100,10 @@ class VinylApp {
 
     // Load saved preferences
     this.loadPreferences();
-    
+
+    // Setup product tour (runs on first visit or version change)
+    this.setupProductTour();
+
     console.log('✅ Vinylfy ready!');
   }
 
@@ -184,6 +200,7 @@ class VinylApp {
 
     // Load and display release notes for all versions between cached and latest
     await this.loadReleaseNotes(cachedVersion, latestVersion);
+    this.trapFocus(this.showCacheUpdateModal);
 
     // Show modal
     modal.classList.remove('hidden');
@@ -544,6 +561,7 @@ class VinylApp {
 
     howItWorksBtn.addEventListener('click', () => {
       howItWorksModal.classList.remove('hidden');
+      this.trapFocus(howItWorksModal);
     });
 
     closeHowItWorksBtn.addEventListener('click', () => {
@@ -695,6 +713,7 @@ class VinylApp {
     const frequencyResponseToggle = document.getElementById('frequencyResponse');
     frequencyResponseToggle.addEventListener('change', (e) => {
       this.customSettings.frequency_response = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
       this.switchToCustomPreset();
     });
 
@@ -707,8 +726,10 @@ class VinylApp {
     const popIntensityValue = document.getElementById('popIntensityValue');
     const popIntensityGroup = document.getElementById('popIntensityGroup');
 
+    // Surface noise taggle listener
     surfaceNoiseToggle.addEventListener('change', (e) => {
       this.customSettings.surface_noise = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
       // Hide/show slider groups instead of disabling
       noiseIntensityGroup.style.display = e.target.checked ? 'block' : 'none';
       popIntensityGroup.style.display = e.target.checked ? 'block' : 'none';
@@ -718,7 +739,8 @@ class VinylApp {
     noiseIntensity.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.noise_intensity = value;
-      noiseIntensityValue.textContent = value.toFixed(3);
+      const valueText = value.toFixed(3);
+      noiseIntensityValue.textContent = valueText;
       this.switchToCustomPreset();
     });
 
@@ -726,7 +748,8 @@ class VinylApp {
     popIntensity.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.pop_intensity = value;
-      popIntensityValue.textContent = value.toFixed(2);
+      const valueText = value.toFixed(2);
+      popIntensityValue.textContent = valueText;
       this.switchToCustomPreset();
     });
 
@@ -738,6 +761,7 @@ class VinylApp {
 
     wowFlutterToggle.addEventListener('change', (e) => {
       this.customSettings.wow_flutter = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
       // Hide/show slider group instead of disabling
       wowFlutterIntensityGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
@@ -746,7 +770,8 @@ class VinylApp {
     wowFlutterIntensity.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.wow_flutter_intensity = value;
-      wowFlutterValue.textContent = value.toFixed(4);
+      const valueText = value.toFixed(4);
+      wowFlutterValue.textContent = valueText;
       this.switchToCustomPreset();
     });
 
@@ -758,6 +783,7 @@ class VinylApp {
 
     harmonicDistortionToggle.addEventListener('change', (e) => {
       this.customSettings.harmonic_distortion = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
       // Hide/show slider group instead of disabling
       distortionAmountGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
@@ -766,7 +792,8 @@ class VinylApp {
     distortionAmount.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.distortion_amount = value;
-      distortionValue.textContent = value.toFixed(2);
+      const valueText = value.toFixed(2);
+      distortionValue.textContent = valueText;
       this.switchToCustomPreset();
     });
 
@@ -778,6 +805,7 @@ class VinylApp {
 
     stereoReductionToggle.addEventListener('change', (e) => {
       this.customSettings.stereo_reduction = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
       // Hide/show slider group instead of disabling
       stereoWidthGroup.style.display = e.target.checked ? 'block' : 'none';
       this.switchToCustomPreset();
@@ -786,7 +814,8 @@ class VinylApp {
     stereoWidth.addEventListener('input', (e) => {
       const value = parseFloat(e.target.value);
       this.customSettings.stereo_width = value;
-      stereoWidthValue.textContent = value.toFixed(2);
+      const valueText = value.toFixed(2);
+      stereoWidthValue.textContent = valueText;
       this.switchToCustomPreset();
     });
   }
@@ -967,6 +996,7 @@ class VinylApp {
     // Open modal
     metadataBtn.addEventListener('click', async () => {
       await this.openMetadataModal();
+      this.trapFocus(metadataModal);
     });
 
     // Close modal
@@ -1198,6 +1228,12 @@ class VinylApp {
       resultsSection.classList.add('hidden');
       this.audioPlayer.hide();
 
+      // Reset progress bar
+      this.updateProgress(0);
+
+      // Show processing tour on first use
+      this.showProcessingTour();
+
       // Prepare options
       const options = {
         preset: this.currentPreset,
@@ -1213,14 +1249,24 @@ class VinylApp {
         options.settings = this.customSettings;
       }
 
+      // Start simulated progress
+      const progressInterval = this.simulateProgress();
+
       // Process audio
       const result = await api.processAudio(this.selectedFile, options);
-      
+
+      // Clear progress interval and set to 100%
+      clearInterval(progressInterval);
+      this.updateProgress(100);
+
+      // Brief delay to show completion state
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       this.processedFileId = result.file_id;
-      
+
       // Show results
       this.showResults(result);
-      
+
       showToast('Processing complete! 🎵', 'success');
       
     } catch (error) {
@@ -1231,7 +1277,53 @@ class VinylApp {
       processBtn.disabled = false;
       processBtn.textContent = 'Process Audio';
       processingIndicator.classList.add('hidden');
+
+      // Reset progress bar
+      this.updateProgress(0);
     }
+  }
+
+  /**
+   * Update progress bar and status text
+   */
+  updateProgress(percent) {
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const processingStatus = document.getElementById('processingStatus');
+
+    if (!progressBar || !progressPercent || !processingStatus) return;
+
+    // Update progress bar width
+    progressBar.style.width = `${percent}%`;
+    progressPercent.textContent = `${Math.round(percent)}%`;
+
+    // Update status text based on progress
+    if (percent >= 0 && percent <= 33) {
+      processingStatus.textContent = 'Grabbing the record...'
+    } else if (percent > 33 && percent <= 66) {
+      processingStatus.textContent = 'Loading the turntable...';
+    } else if (percent > 66 && percent < 100) {
+      processingStatus.textContent = 'Putting down the needle...';
+    } else if (percent >= 100) {
+      processingStatus.textContent = 'Vinylfy Complete!';
+    }
+  }
+
+  /**
+   * Simulate progress during processing
+   */
+  simulateProgress() {
+    let progress = 0;
+    const interval = setInterval(() => {
+      // Increment progress with diminishing speed (slower as it approaches 95%)
+      if (progress < 95) {
+        const increment = Math.random() * (95 - progress) * 0.1;
+        progress = Math.min(95, progress + increment);
+        this.updateProgress(progress);
+      }
+    }, 200);
+
+    return interval;
   }
 
   /**
@@ -1673,6 +1765,270 @@ class VinylApp {
   }
 
   /**
+   * Setup product tour with Driver.js
+   * Shows on first visit or when app version changes
+   */
+  setupProductTour() {
+    const TOUR_STORAGE_KEY = 'vinylfy_tour_completed';
+
+    // Get stored tour completion data
+    const tourData = storage.get(TOUR_STORAGE_KEY);
+    const tourCompleted = tourData?.completed;
+    const lastTourVersion = tourData?.version;
+
+    // Show tour if:
+    // 1. Never completed before (first visit)
+    // 2. App version changed since last tour
+    const shouldShowTour = !tourCompleted || lastTourVersion !== APP_VERSION;
+
+    if (!shouldShowTour) {
+      console.log('ℹ️ Product tour skipped (already completed for this version)');
+      return;
+    }
+
+    // Small delay to ensure DOM is fully ready
+    setTimeout(() => {
+      this.startProductTour(APP_VERSION, TOUR_STORAGE_KEY);
+    }, 500);
+  }
+
+  /**
+   * Start the product tour
+   */
+  startProductTour(appVersion, storageKey) {
+    // Check if Driver.js is loaded
+    if (typeof window.driver === 'undefined') {
+      console.warn('⚠️ Driver.js not loaded, skipping tour');
+      return;
+    }
+
+    const driverObj = window.driver({
+      sanitize: false, // For HTML embeds
+      showProgress: true,
+      showButtons: ['next', 'previous', 'close'],
+      steps: [
+        {
+          popover: {
+            title: 'Welcome to Vinylfy!',
+            description: 'Transform your digital audio files into warm, nostalgic vinyl records with authentic vintage effects.',
+            side: 'center',
+            align: 'center'
+          }
+        },
+        { element: '.theme-toggle-group',
+          popover: {
+            title: 'Vinylfy Top Area',
+            description: 'Vinylfy supports light mode and dark mode. By default, Vinylfy respects your system or browser settings in the Auto mode.', // Show top nav walkthrough video
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '#githubLink',
+          popover: {
+            title: 'Find Vinylfy on Github',
+            description: 'Vinylfy is open source, so all vinyl enthusiasts can use and install Vinylfy. Click here to view Vinylfy on Github and see how to install Vinylfy yourself. If you\'re a developer and want to contribute to Vinylfy, you can find more information on Github as well.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '#healthStatus',
+          popover: {
+            title: 'Turnable Status',
+            description: 'The turntable is the heart of Vinylfy. Check here to make sure the turntable is spinning before proceeding forward. If the turntable is stopped, check with your system administrator.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '#audioFile',
+          popover: {
+            title: 'Uploading Your Audio',
+            description: 'Start by selecting an audio file. We support WAV, MP3, FLAC, OGG, M4A, and AAC formats. The maximum upload size for files is set by your Vinylfy administrator.',
+            side: 'left',
+            align: 'start'
+          }
+        },
+        {
+          element: '#presetSelector',
+          popover: {
+            title: 'Choosing Your Vinyl Effect',
+            description: 'Select a preset from Vinylfy, including AJW Recommended from Vinylfy\'s own vinyl enthusiast, or choose Custom to fine-tune your track to your preference.',
+            side: 'left',
+            align: 'center'
+          }
+        },
+        {
+          element: '#formatSelector',
+          popover: {
+            title: 'Select Output Format',
+            description: 'Choose your preferred output format. MP3 is most compatible, FLAC is lossless, and AAC offers high quality with smaller file sizes.',
+            side: 'right',
+            align: 'center'
+          }
+        },
+        {
+          element: '#howItWorksBtn',
+          popover: {
+            title: 'Learn How It Works',
+            description: 'Click this button anytime to learn about the vinyl effects being applied to your audio.',
+            side: 'right',
+            align: 'center'
+          }
+        },
+        {
+          element: '#surfaceNose',
+          popover: {
+            title: 'Vinylfy Switches',
+            description: 'Use the Vinylfy switches to enable or disable certain effects.',
+            side: 'left',
+            align: 'center'
+          }
+        },
+        {
+          element: '#noiseintensityGroup',
+          popover: {
+            title: "Using the sliders ...",
+            description: 'Use the sliders to customize your settings for each group. Sliders will disappear for a group if their corresponding switches are off.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '#processBtn',
+          popover: {
+            title: '3. Process Your Audio',
+            description: 'Once you\'ve uploaded a file and selected your settings, click here to start the vinylification process!',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          popover: {
+            title: 'You\'re ready to Vinylfy your music!',
+            description: 'Start uploading your audio files and give them that authentic vinyl sound. Your files are processed securely and deleted after the amount of time set by your administrator.',
+            side: 'center',
+            align: 'center'
+          }
+        }
+      ],
+      onDestroyStarted: () => {
+        // Mark tour as completed when user finishes or closes it
+        storage.set(storageKey, {
+          completed: true,
+          version: appVersion,
+          completedAt: new Date().toISOString()
+        });
+        driverObj.destroy();
+      }
+    });
+
+    console.log('🎯 Starting product tour...');
+    driverObj.drive();
+  }
+
+  /**
+   * Show processing tour on first use
+   */
+  showProcessingTour() {
+    const PROCESSING_TOUR_KEY = 'vinylfy_processing_tour_shown';
+
+    // Check if tour has already been shown
+    if (storage.get(PROCESSING_TOUR_KEY)) {
+      return; // Already shown, skip
+    }
+
+    // Check if Driver.js is loaded
+    if (typeof window.driver === 'undefined') {
+      return;
+    }
+
+    // Small delay to let processing indicator render
+    setTimeout(() => {
+      const driverObj = window.driver({
+        sanitize: false, // for HTML
+        showProgress: true,
+        showButtons: ['previous','next', 'close'],
+        steps: [
+          {
+            element: '#resultsSection',
+            popover: {
+              title: 'Seeing Your Results ...',
+              description: 'This section will appear after you begin processing your audio. Let\'s explore some of its key components ...',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#processingStatus',
+            popover: {
+              title: 'Watch Vinylfy Do Its Magic!',
+              description: 'Watch the status message change as we analyze your audio, apply vinyl effects, and finalize your track.',
+              side: 'left',
+              align: 'center'
+            }
+          },
+          {
+            element: '.progress-bar-container',
+            popover: {
+              title: 'Vinylifcation Indicator',
+              description: 'The progress bar shows how far along the needle is Vinylfying your audio. Vinylfication typically takes 10-30 seconds depending on file size.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#previewBtn',
+            popover: {
+              title: 'Previewing your Vinylfied audio',
+              description: 'Click here to preview you new audio track with vinylification completed. You can play, pause, and move forward or backwards through your track.',
+              side: 'left',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metadataBtn',
+            popover: {
+              title: 'Don\'t have any metadata, or want to change it? No problem!',
+              description: 'Metadata maangement is easy with Vinylfy! Click here to review your file\'s metadata, you can keep it as it is, or add your own metadata including album artwork! Metadata management is only available with AAC, MP3, and FLAC output formats.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#downloadBtn',
+            popover: {
+              title: 'Saving your Vinylfied audio',
+              description: 'Click here to download your new vinylfied audio.',
+              side: 'bottom',
+              align: 'center'
+            }
+          },
+          {
+            element: '#discardBtn',
+            popover: {
+              title: 'Looking for a Remix?',
+              description: 'Need to remix your track? Vinylfy has you covered. Press the discard buton to start over again until you get your favorite vinyl sound.',
+              side: 'right',
+              align: 'center'
+
+            }
+          }
+        ],
+        onDestroyStarted: () => {
+          // Mark tour as shown
+          storage.set(PROCESSING_TOUR_KEY, true);
+          driverObj.destroy();
+        }
+      });
+
+      console.log('🎬 Starting processing tour...');
+      driverObj.drive();
+    }, 600); // Delay to ensure progress bar is rendered
+  }
+
+  /**
    * Save user preferences
    */
   savePreferences() {
@@ -1749,6 +2105,37 @@ class VinylApp {
     document.getElementById('stereoWidthValue').textContent = this.customSettings.stereo_width.toFixed(2);
     // Hide/show slider group based on toggle state
     document.getElementById('stereoWidthGroup').style.display = this.customSettings.stereo_reduction ? 'block' : 'none';
+  }
+
+  /**
+   * Trap focus within modal for keyboard navigation
+   */
+  trapFocus(modal) {
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+        else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+
+      if(e.key === 'Escape') {
+        modal.classList.add('hidden');
+        this.resetMetadataEditMode();
+      }
+    });
+
+    firstElement?.focus();
   }
 }
 

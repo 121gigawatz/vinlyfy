@@ -1,4 +1,15 @@
 {
+  "v1.0.0 Beta 3": {
+    "date": "2025-11-17",
+    "highlights": [
+      "Our biggest feature packed release before public launch is here!",
+      "Check out the improvements below ..."
+    ],
+    "bugfixes": [
+      "We've cleaned up the UI spacing to make it more consistent across devices",
+      "Fixed some scratches in our cache reloading for the most up-to-date experience."
+    ]
+  },
   "v1.0.0 Beta 2.4.3": {
     "date": "2025-11-14",
     "highlights": [

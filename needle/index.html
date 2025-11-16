@@ -28,8 +28,16 @@
   <link rel="stylesheet" href="/css/base.css?v=beta2.4.3">
   <link rel="stylesheet" href="/css/components.css?v=beta2.4.3">
   <link rel="stylesheet" href="/css/responsive.css?v=beta2.4.3">
+
+  <!-- Driver.js for product tours -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
+  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.iife.js"></script>
 </head>
 <body>
+  <!-- Skip Navigation -->
+   <a href="#main-content" class="skip-link">Go to Vinylfy configurator</a>
+  <!-- Screen Reader Announcements for Accessibility-->
+   <div id="aria-live-region" aria-live="polite" aria-atomic="true" class="sr-only"></div>
   <!-- Header -->
   <header class="app-header container" style="padding-top: var(--space-xs); padding-bottom: var(--space-lg);">
     <div class="flex-between mobile-flex-col gap-md">
@@ -57,33 +65,33 @@
           <button id="themeAuto" class="theme-toggle-btn active" data-theme="auto" aria-label="Auto mode" title="Auto mode">Auto</button>
         </div>
         <span id="healthStatus" class="badge badge-secondary">Checking...</span>
-        <button id="installBtn" class="btn btn-ghost btn-sm hidden" aria-label="Install app">
-          📲 Install
+        <button id="installBtn" class="btn btn-ghost btn-sm hidden" aria-label="Install Vinylfy as a progressive web app">
+          <span aria-hidden="true">📲</span> Install
         </button>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="container" style="padding-bottom: var(--space-xs);">
+  <main id="main-content" class="container" style="padding-bottom: var(--space-xs);">
     
     <!-- Hero Section -->
     <section class="hero animate-fadeIn">
       <div class="hero-content">
-        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-xs); width: 80px; height: 80px;"></div>
+        <img id="turntableIcon" src="/assets/icons/turntable.png" alt="Record player turntable" style="margin: 0 auto var(--space-xs); width: 80px; height: 80px; display: block;">
         <h1 class="hero-title">Give Your Digital Music That Vinyl Sound</h1>
         <p class="hero-subtitle">Transform digital audio into warm, nostalgic vinyl records</p>
         <div class="hero-features">
-          <span class="hero-feature">🎧 Authentic Sound</span>
-          <span class="hero-feature">⚡ Fast Processing</span>
-          <span class="hero-feature">📱 Any Device</span>
-          <span class="hero-feature">🎵 Multiple Formats</span>
+          <span class="hero-feature"><span aria-hidden="true">🎧</span> Authentic Sound</span>
+          <span class="hero-feature"><span aria-hidden="true">⚡</span> Fast Processing</span>
+          <span class="hero-feature"><span aria-hidden="true">📱</span> Any Device</span>
+          <span class="hero-feature"><span aria-hidden="true">🎵</span> Multiple Formats</span>
         </div>
       </div>
     </section>
 
     <!-- Step 1: Upload Your Audio -->
-    <section class="section animate-slideUp" style="margin-top: var(--space-xs); margin-bottom: var(--space-xs);">
+    <section class="section animate-slideUp">
       <div class="card card-glow gradient-border">
         <div class="card-header">
           <div style="display: flex; align-items: center; gap: var(--space-xs);">
@@ -104,7 +112,7 @@
                 aria-label="Upload audio file"
               >
               <label for="audioFile" class="file-upload-label" id="fileUploadLabel">
-                <div class="file-upload-icon">🎧</div>
+                <div class="file-upload-icon"><span aria-hidden="true">🎧</span></div>
                 <div class="file-upload-text">Click or drag audio file here</div>
                 <div class="file-upload-hint" id="fileUploadHint">Supports: WAV, MP3, FLAC, OGG, M4A, AAC (Max 25MB)</div>
               </label>
@@ -123,7 +131,7 @@
     </section>
 
     <!-- Step 2: Configure Settings -->
-    <section class="section animate-slideUp" style="animation-delay: 0.1s; margin-top: var(--space-xs); margin-bottom: var(--space-xs);">
+    <section class="section animate-slideUp" style="animation-delay: 0.1s;">
       <div class="card card-glow gradient-border">
         <div class="card-header">
           <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
@@ -134,7 +142,7 @@
                 <p class="card-subtitle">Select a preset or customize your own</p>
               </div>
             </div>
-            <button id="howItWorksBtn" class="btn btn-ghost btn-sm" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; padding: 0; border-radius: 50%; border: 2px solid var(--color-primary); color: var(--color-primary); font-size: var(--font-size-md); display: flex; align-items: center; justify-content: center;" title="How does Vinylfy work?" aria-label="How it works">
+            <button id="howItWorksBtn" class="btn btn-ghost btn-sm" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; padding: 0; border-radius: 50%; border: 2px solid var(--color-info); color: var(--color-info); font-size: var(--font-size-md); display: flex; align-items: center; justify-content: center; cursor: pointer;" title="How does Vinylfy work?" aria-label="How it works">
               ?
             </button>
           </div>
@@ -176,8 +184,8 @@
                 <!-- Frequency Response -->
                 <div class="form-group">
                   <label class="toggle">
-                    <input type="checkbox" id="frequencyResponse" class="toggle-input" checked>
-                    <span class="toggle-switch"></span>
+                    <input type="checkbox" id="frequencyResponse" class="toggle-input" role="switch" aria-checked="true" aria-label="Enable frequency reponse with RIAA curve" checked>
+                    <span class="toggle-switch" aria-hidden ="true"></span>
                     <span>Frequency Response (RIAA curve)</span>
                   </label>
                 </div>
@@ -185,16 +193,17 @@
                 <!-- Surface Noise -->
                 <div class="form-group">
                   <label class="toggle">
-                    <input type="checkbox" id="surfaceNoise" class="toggle-input" checked>
-                    <span class="toggle-switch"></span>
+                    <input type="checkbox" id="surfaceNoise" class="toggle-input" role="switch" aria-checked="true" aria-label="Enable surface noise with crackles and pops" checked>
+                    <span class="toggle-switch" aria-hidden="true"></span>
                     <span>Surface Noise (crackles & pops)</span>
                   </label>
                 </div>
 
+                <!-- Noise Intenisty -->
                 <div class="range-group" id="noiseIntensityGroup">
                   <div class="range-label">
-                    <span>Noise Intensity</span>
-                    <span class="range-value" id="noiseIntensityValue">0.020</span>
+                    <label for="noiseIntensity">Noise Intensity</label>
+                    <span class="range-value" id="noiseIntensityValue" aria-live="polite">0.020</span>
                   </div>
                   <input
                     type="range"
@@ -209,8 +218,8 @@
 
                 <div class="range-group" id="popIntensityGroup">
                   <div class="range-label">
-                    <span>Pop Intensity</span>
-                    <span class="range-value" id="popIntensityValue">0.60</span>
+                    <label for="popIntensity">Pop Intensity</label>
+                    <span class="range-value" id="popIntensityValue" aria-live="polite">0.60</span>
                   </div>
                   <input
                     type="range"
@@ -226,16 +235,16 @@
                 <!-- Wow & Flutter -->
                 <div class="form-group">
                   <label class="toggle">
-                    <input type="checkbox" id="wowFlutter" class="toggle-input" checked>
-                    <span class="toggle-switch"></span>
+                    <input type="checkbox" id="wowFlutter" class="toggle-input" role="switch" aria-checked="true" aria-label="Enable wow and flutter pitch variations" checked>
+                    <span class="toggle-switch" aria-hidden="true"></span>
                     <span>Wow & Flutter (pitch variations)</span>
                   </label>
                 </div>
 
                 <div class="range-group" id="wowFlutterIntensityGroup">
                   <div class="range-label">
-                    <span>Wow/Flutter Intensity</span>
-                    <span class="range-value" id="wowFlutterValue">0.0010</span>
+                    <label for="wowFlutterIntensity">Wow/Flutter Intensity</label>
+                    <span class="range-value" id="wowFlutterValue" aria-live="polite">0.0010</span>
                   </div>
                   <input
                     type="range"
@@ -254,16 +263,16 @@
                 <!-- Harmonic Distortion -->
                 <div class="form-group">
                   <label class="toggle">
-                    <input type="checkbox" id="harmonicDistortion" class="toggle-input" checked>
-                    <span class="toggle-switch"></span>
+                    <input type="checkbox" id="harmonicDistortion" class="toggle-input" role="switch" aria-checked="true" aria-label="Enable harmonic distortion for analog warmth" checked>
+                    <span class="toggle-switch" aria-hidden="true"></span>
                     <span>Harmonic Distortion (analog warmth)</span>
                   </label>
                 </div>
 
                 <div class="range-group" id="distortionAmountGroup">
                   <div class="range-label">
-                    <span>Distortion Amount</span>
-                    <span class="range-value" id="distortionValue">0.15</span>
+                    <label for="distortionAmount">Distortion Amount</label>
+                    <span class="range-value" id="distortionValue" aria-live="polite">0.15</span>
                   </div>
                   <input
                     type="range"
@@ -279,16 +288,16 @@
                 <!-- Stereo Reduction -->
                 <div class="form-group">
                   <label class="toggle">
-                    <input type="checkbox" id="stereoReduction" class="toggle-input" checked>
-                    <span class="toggle-switch"></span>
+                    <input type="checkbox" id="stereoReduction" class="toggle-input" role="switch" aria-checked="true" aria-label="Enable stereo reduction for limited separation" checked>
+                    <span class="toggle-switch" aria-hidden="true"></span>
                     <span>Stereo Reduction (limited separation)</span>
                   </label>
                 </div>
 
                 <div class="range-group" id="stereoWidthGroup">
                   <div class="range-label">
-                    <span>Stereo Width</span>
-                    <span class="range-value" id="stereoWidthValue">0.70</span>
+                    <label for="stereoWidth">Stereo Width</label>
+                    <span class="range-value" id="stereoWidthValue" aria-live="polite">0.70</span>
                   </div>
                   <input
                     type="range"
@@ -307,9 +316,9 @@
 
         <!-- Process Button -->
         <div class="card-footer">
-          <button id="processBtn" class="btn btn-primary btn-lg btn-full" disabled>
+          <button id="processBtn" class="btn btn-primary btn-lg btn-full" disabled aria-label="Process audio with vinyl effects">
             Process Audio
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 8px; vertical-align: middle;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 8px; vertical-align: middle;" aria-hidden="true">
               <line x1="5" y1="12" x2="19" y2="12"/>
               <polyline points="12 5 19 12 12 19"/>
             </svg>
@@ -319,11 +328,15 @@
     </section>
 
     <!-- Processing Indicator -->
-    <section id="processingIndicator" class="section hidden animate-fadeIn">
+    <section id="processingIndicator" class="section hidden animate-fadeIn" role="status" aria-live="polite" aria-atomic="true">
       <div class="card card-elevated text-center">
-        <div class="vinyl-record spinning" style="margin: 0 auto var(--space-sm);"></div>
-        <h3 style="color: var(--color-primary);">Processing Your Audio...</h3>
-        <p class="text-secondary">Adding that warm vinyl character 🎶</p>
+        <h3 id="processingStatus" style="color: var(--color-primary); margin-bottom: var(--space-md);">Analyzing your audio...</h3>
+        <div class="progress-bar-container" style="margin: 0 auto var(--space-md); max-width: 400px;">
+          <div class="progress-bar-bg">
+            <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <p id="progressPercent" class="text-secondary" style="margin-top: var(--space-sm); font-size: var(--font-size-sm);">0%</p>
+        </div>
       </div>
     </section>
 
@@ -362,25 +375,25 @@
           </div>
 
           <div class="alert alert-info">
-            ⏱️ This file will expire in <strong id="expiresIn">-</strong>
+            <span aria-hidden="true">⏱️</span> This file will expire in <strong id="expiresIn">-</strong>
           </div>
 
           <!-- Audio Player -->
-          <div id="audioPlayerContainer" class="hidden"></div>
+          <div id="audioPlayerContainer" class="hidden" role="region" aria-label="Audio player to preview processed file"></div>
 
           <!-- Action Buttons -->
           <div class="btn-group" style="margin-top: var(--space-xs);">
-            <button id="previewBtn" class="btn btn-secondary btn-lg">
-              🎧 Preview
+            <button id="previewBtn" class="btn btn-secondary btn-lg" aria-label="Preview processed audio file">
+              <span aria-hidden="true">🎧</span> Preview
             </button>
-            <button id="metadataBtn" class="btn btn-secondary btn-lg" title="View and edit audio metadata (MP3 only)">
-              🏷️ Metadata
+            <button id="metadataBtn" class="btn btn-secondary btn-lg" title="View and edit audio metadata (MP3 only)" aria-label="Manage audio file metadata">
+              <span aria-hidden="true">🏷️</span> Metadata
             </button>
-            <button id="downloadBtn" class="btn btn-primary btn-lg">
-              ⬇ Download
+            <button id="downloadBtn" class="btn btn-primary btn-lg" aria-label="Download processed file">
+              <span aria-hidden="true">⬇</span> Download
             </button>
-            <button id="discardBtn" class="btn btn-ghost btn-lg" style="border: 1px solid var(--color-border);">
-              🗑️ Discard
+            <button id="discardBtn" class="btn btn-ghost btn-lg" style="border: 1px solid var(--color-border);" aria-label="Discard audio file and start over">
+              <span aria-hidden="true">🗑️</span> Discard
             </button>
           </div>
         </div>
@@ -402,10 +415,10 @@
         Transform digital audio into warm vinyl records
       </p>
       <div style="display: flex; gap: var(--space-xs); justify-content: center; flex-wrap: wrap; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-        <span>🎵 Authentic Sound</span>
-        <span>⚡ Fast Processing</span>
-        <span>🔒 Privacy First</span>
-        <span>📱 PWA Ready</span>
+        <span><span aria-hidden="true">🎵</span> Authentic Sound</span>
+        <span><span aria-hidden="true">⚡</span> Fast Processing</span>
+        <span><span aria-hidden="true">🔒</span> Privacy First</span>
+        <span><span aria-hidden="true">📱</span> PWA Ready</span>
       </div>
       <p class="text-muted" style="font-size: var(--font-size-xs); margin-top: var(--space-xs);">
         Made with ❤️ for AJW and vinyl enthusiasts • <span id="fileTTL">Files auto-delete after 1 hour</span>
@@ -414,11 +427,11 @@
   </footer>
 
   <!-- Cache Update Modal -->
-  <div id="cacheUpdateModal" class="modal hidden">
-    <div class="modal-overlay"></div>
+  <div id="cacheUpdateModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cacheModalTitle">
+    <div class="modal-overlay" aria-hidden="true"></div>
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h3 style="color: var(--color-primary); margin: 0;">🔄 Update Available</h3>
+        <h3 style="color: var(--color-primary); margin: 0;"><span aria-hidden="true">🔄</span>Update Available</h3>
       </div>
       <div class="modal-body">
         <p style="margin-bottom: var(--space-md); color: var(--color-text-primary);">
@@ -434,7 +447,7 @@
         <!-- Release Notes Section -->
         <div id="releaseNotesSection" style="margin-bottom: var(--space-md); display: none;">
           <h4 style="font-size: var(--font-size-md); color: var(--color-primary); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-xs);">
-            ✨ What's New In This Release
+            <span aria-hidden="true">✨</span> What's New In This Release
           </h4>
           <div id="releaseNotesContent" style="background: var(--color-bg-tertiary); padding: var(--space-md); border-radius: var(--radius-md); border-left: 3px solid var(--color-primary); max-height: 250px; overflow-y: auto;">
             <!-- Release notes will be inserted here -->
@@ -446,8 +459,8 @@
         </p>
       </div>
       <div class="modal-footer" style="display: flex; gap: var(--space-sm); justify-content: flex-end;">
-        <button id="dismissCacheModal" class="btn btn-ghost">Later</button>
-        <button id="clearCacheBtn" class="btn btn-primary">
+        <button id="dismissCacheModal" class="btn btn-ghost" aria-label="Close Cache Reload without clearing cache. This could result in not having the latest features.">Later</button>
+        <button id="clearCacheBtn" class="btn btn-primary" aria-label="Clear browser cache and get latest updates.">
           🧹 Clear Cache & Reload
         </button>
       </div>
@@ -455,12 +468,12 @@
   </div>
 
   <!-- How It Works Modal -->
-  <div id="howItWorksModal" class="modal hidden">
-    <div class="modal-overlay"></div>
+  <div id="howItWorksModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="howItWorksModalTitle">
+    <div class="modal-overlay" aria-hidden="true"></div>
     <div class="modal-content" style="max-width: 600px;">
       <div class="modal-header">
         <h3 style="color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: var(--space-xs);">
-          <span>ℹ️</span>
+          <span aria-hidden="true">ℹ️</span>
           <span>How It Works</span>
         </h3>
       </div>
@@ -526,7 +539,7 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end;">
+      <div class="modal-footer" style="display: flex; justify-content: flex-end;" aria-label="Close How It Works">
         <button id="closeHowItWorksModal" class="btn btn-primary">
           I'm Ready to Vinylfy my Music
         </button>
@@ -535,12 +548,12 @@
   </div>
 
   <!-- Metadata Modal -->
-  <div id="metadataModal" class="modal hidden">
-    <div class="modal-overlay"></div>
+  <div id="metadataModal" class="modal hidden" role="dialog" aria-model="true" aria-labelledby="metadataModalTitle">
+    <div class="modal-overlay" aria-hidden="true"></div>
     <div class="modal-content" style="max-width: 700px;">
       <div class="modal-header">
         <h3 style="color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: var(--space-xs);">
-          <span>🏷️</span>
+          <span aria-hidden="true">🏷️</span>
           <span>Audio Metadata</span>
         </h3>
       </div>
@@ -620,14 +633,14 @@
         </div>
       </div>
       <div class="modal-footer" style="display: flex; justify-content: space-between; gap: var(--space-sm);">
-        <button id="closeMetadataModal" class="btn btn-ghost">
+        <button id="closeMetadataModal" class="btn btn-ghost" aria-label="Close Metadata manager window">
           Close
         </button>
         <div style="display: flex; gap: var(--space-sm);">
-          <button id="editMetadataBtn" class="btn btn-secondary">
+          <button id="editMetadataBtn" class="btn btn-secondary" aria-label="Modify audio file metadata">
             Modify Metadata
           </button>
-          <button id="saveMetadataBtn" class="btn btn-primary hidden">
+          <button id="saveMetadataBtn" class="btn btn-primary hidden" aria-label="Save audio file metadata">
             Save Changes
           </button>
         </div>
