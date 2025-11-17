@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 2.4.3';
+const APP_VERSION = 'v1.0.0 Beta 3';
 
-import api from './api.js?v=beta2.4.3';
-import AudioPlayer from './audio-player.js?v=beta2.4.3';
+import api from './api.js?v=beta3';
+import AudioPlayer from './audio-player.js?v=beta3';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,13 +16,13 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta2.4.3';
+} from './utils.js?v=beta3';
 import {
   extractMetadata,
   writeMetadata,
   getEmptyMetadata,
   supportsMetadataWriting
-} from './metadata.js?v=beta2.4.3';
+} from './metadata.js?v=beta3';
 
 class VinylApp {
   constructor() {
@@ -77,22 +77,10 @@ class VinylApp {
     this.setupThemeToggle();
     this.setupGitHubStars();
     this.setupMetadataModal();
+    this.setupHelpButtons(); // Setup contextual help tours
 
     // Initialize audio player
     this.audioPlayer = new AudioPlayer('audioPlayerContainer');
-    this.audioPlayer.innerHTML = `<div class="audio-player" role="group" aria-label="Audio player controls">
-        <div class="audio-controls">
-          <button class "audio-play-btn" id="${this.id}-play-btn" aria-label="Play audio" aria-pressed="fasle">
-            ▶
-          </button>
-          <div class="audio-timeline" id="${this.id}-timeline" aria-label="Audio timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0 seconds of 0 seconds" tabindex="0">
-          </div>
-        </div>
-        <div class="audio-time" aria-live="off">
-          <span id="${this.id}-current-time" aria-label="Current time">0:00</span>
-          <span id="${this.id}-duration" aria-label="Duration">0.00</span>
-        </div>
-      `;
     this.audioPlayer.hide();
 
     // Setup PWA
@@ -405,7 +393,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta2.4.3';
+      const currentVersion = 'beta3';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -554,25 +542,7 @@ class VinylApp {
       }
     });
 
-    // How It Works button
-    const howItWorksBtn = document.getElementById('howItWorksBtn');
-    const howItWorksModal = document.getElementById('howItWorksModal');
-    const closeHowItWorksBtn = document.getElementById('closeHowItWorksModal');
-
-    howItWorksBtn.addEventListener('click', () => {
-      howItWorksModal.classList.remove('hidden');
-      this.trapFocus(howItWorksModal);
-    });
-
-    closeHowItWorksBtn.addEventListener('click', () => {
-      howItWorksModal.classList.add('hidden');
-    });
-
-    // Close modal on overlay click
-    const howItWorksOverlay = howItWorksModal.querySelector('.modal-overlay');
-    howItWorksOverlay.addEventListener('click', () => {
-      howItWorksModal.classList.add('hidden');
-    });
+    // How It Works button removed - replaced with contextual help tours
   }
 
   /**
@@ -741,6 +711,9 @@ class VinylApp {
       this.customSettings.noise_intensity = value;
       const valueText = value.toFixed(3);
       noiseIntensityValue.textContent = valueText;
+      // Update ARIA attributes
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
       this.switchToCustomPreset();
     });
 
@@ -750,6 +723,9 @@ class VinylApp {
       this.customSettings.pop_intensity = value;
       const valueText = value.toFixed(2);
       popIntensityValue.textContent = valueText;
+      // Update ARIA attributes
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
       this.switchToCustomPreset();
     });
 
@@ -772,6 +748,9 @@ class VinylApp {
       this.customSettings.wow_flutter_intensity = value;
       const valueText = value.toFixed(4);
       wowFlutterValue.textContent = valueText;
+      // Update ARIA attributes
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
       this.switchToCustomPreset();
     });
 
@@ -794,6 +773,9 @@ class VinylApp {
       this.customSettings.distortion_amount = value;
       const valueText = value.toFixed(2);
       distortionValue.textContent = valueText;
+      // Update ARIA attributes
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
       this.switchToCustomPreset();
     });
 
@@ -816,6 +798,9 @@ class VinylApp {
       this.customSettings.stereo_width = value;
       const valueText = value.toFixed(2);
       stereoWidthValue.textContent = valueText;
+      // Update ARIA attributes
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
       this.switchToCustomPreset();
     });
   }
@@ -1766,232 +1751,241 @@ class VinylApp {
 
   /**
    * Setup product tour with Driver.js
-   * Shows on first visit or when app version changes
+   * Disabled - tours are now triggered manually via help buttons
    */
   setupProductTour() {
-    const TOUR_STORAGE_KEY = 'vinylfy_tour_completed';
-
-    // Get stored tour completion data
-    const tourData = storage.get(TOUR_STORAGE_KEY);
-    const tourCompleted = tourData?.completed;
-    const lastTourVersion = tourData?.version;
-
-    // Show tour if:
-    // 1. Never completed before (first visit)
-    // 2. App version changed since last tour
-    const shouldShowTour = !tourCompleted || lastTourVersion !== APP_VERSION;
-
-    if (!shouldShowTour) {
-      console.log('ℹ️ Product tour skipped (already completed for this version)');
-      return;
-    }
-
-    // Small delay to ensure DOM is fully ready
-    setTimeout(() => {
-      this.startProductTour(APP_VERSION, TOUR_STORAGE_KEY);
-    }, 500);
-  }
-
-  /**
-   * Start the product tour
-   */
-  startProductTour(appVersion, storageKey) {
-    // Check if Driver.js is loaded
-    if (typeof window.driver === 'undefined') {
-      console.warn('⚠️ Driver.js not loaded, skipping tour');
-      return;
-    }
-
-    const driverObj = window.driver({
-      sanitize: false, // For HTML embeds
-      showProgress: true,
-      showButtons: ['next', 'previous', 'close'],
-      steps: [
-        {
-          popover: {
-            title: 'Welcome to Vinylfy!',
-            description: 'Transform your digital audio files into warm, nostalgic vinyl records with authentic vintage effects.',
-            side: 'center',
-            align: 'center'
-          }
-        },
-        { element: '.theme-toggle-group',
-          popover: {
-            title: 'Vinylfy Top Area',
-            description: 'Vinylfy supports light mode and dark mode. By default, Vinylfy respects your system or browser settings in the Auto mode.', // Show top nav walkthrough video
-            side: 'bottom',
-            align: 'center'
-          }
-        },
-        {
-          element: '#githubLink',
-          popover: {
-            title: 'Find Vinylfy on Github',
-            description: 'Vinylfy is open source, so all vinyl enthusiasts can use and install Vinylfy. Click here to view Vinylfy on Github and see how to install Vinylfy yourself. If you\'re a developer and want to contribute to Vinylfy, you can find more information on Github as well.',
-            side: 'bottom',
-            align: 'center'
-          }
-        },
-        {
-          element: '#healthStatus',
-          popover: {
-            title: 'Turnable Status',
-            description: 'The turntable is the heart of Vinylfy. Check here to make sure the turntable is spinning before proceeding forward. If the turntable is stopped, check with your system administrator.',
-            side: 'bottom',
-            align: 'center'
-          }
-        },
-        {
-          element: '#audioFile',
-          popover: {
-            title: 'Uploading Your Audio',
-            description: 'Start by selecting an audio file. We support WAV, MP3, FLAC, OGG, M4A, and AAC formats. The maximum upload size for files is set by your Vinylfy administrator.',
-            side: 'left',
-            align: 'start'
-          }
-        },
-        {
-          element: '#presetSelector',
-          popover: {
-            title: 'Choosing Your Vinyl Effect',
-            description: 'Select a preset from Vinylfy, including AJW Recommended from Vinylfy\'s own vinyl enthusiast, or choose Custom to fine-tune your track to your preference.',
-            side: 'left',
-            align: 'center'
-          }
-        },
-        {
-          element: '#formatSelector',
-          popover: {
-            title: 'Select Output Format',
-            description: 'Choose your preferred output format. MP3 is most compatible, FLAC is lossless, and AAC offers high quality with smaller file sizes.',
-            side: 'right',
-            align: 'center'
-          }
-        },
-        {
-          element: '#howItWorksBtn',
-          popover: {
-            title: 'Learn How It Works',
-            description: 'Click this button anytime to learn about the vinyl effects being applied to your audio.',
-            side: 'right',
-            align: 'center'
-          }
-        },
-        {
-          element: '#surfaceNose',
-          popover: {
-            title: 'Vinylfy Switches',
-            description: 'Use the Vinylfy switches to enable or disable certain effects.',
-            side: 'left',
-            align: 'center'
-          }
-        },
-        {
-          element: '#noiseintensityGroup',
-          popover: {
-            title: "Using the sliders ...",
-            description: 'Use the sliders to customize your settings for each group. Sliders will disappear for a group if their corresponding switches are off.',
-            side: 'top',
-            align: 'center'
-          }
-        },
-        {
-          element: '#processBtn',
-          popover: {
-            title: '3. Process Your Audio',
-            description: 'Once you\'ve uploaded a file and selected your settings, click here to start the vinylification process!',
-            side: 'top',
-            align: 'center'
-          }
-        },
-        {
-          popover: {
-            title: 'You\'re ready to Vinylfy your music!',
-            description: 'Start uploading your audio files and give them that authentic vinyl sound. Your files are processed securely and deleted after the amount of time set by your administrator.',
-            side: 'center',
-            align: 'center'
-          }
-        }
-      ],
-      onDestroyStarted: () => {
-        // Mark tour as completed when user finishes or closes it
-        storage.set(storageKey, {
-          completed: true,
-          version: appVersion,
-          completedAt: new Date().toISOString()
-        });
-        driverObj.destroy();
-      }
-    });
-
-    console.log('🎯 Starting product tour...');
-    driverObj.drive();
+    // Automatic tour disabled - now using contextual help buttons
+    console.log('ℹ️ Contextual tours available via help buttons');
   }
 
   /**
    * Show processing tour on first use
+   * Disabled - now using contextual help button
    */
   showProcessingTour() {
-    const PROCESSING_TOUR_KEY = 'vinylfy_processing_tour_shown';
+    // Processing tour disabled - now using contextual help button
+    return;
+  }
 
-    // Check if tour has already been shown
-    if (storage.get(PROCESSING_TOUR_KEY)) {
-      return; // Already shown, skip
-    }
-
-    // Check if Driver.js is loaded
-    if (typeof window.driver === 'undefined') {
-      return;
-    }
-
-    // Small delay to let processing indicator render
-    setTimeout(() => {
-      const driverObj = window.driver({
-        sanitize: false, // for HTML
-        showProgress: true,
-        showButtons: ['previous','next', 'close'],
+  /**
+   * Contextual tour definitions
+   * Populate these with your driver.js tour steps
+   */
+  getTourDefinitions() {
+    return {
+      upload: {
         steps: [
           {
-            element: '#resultsSection',
+            element: '#audioFile',
             popover: {
-              title: 'Seeing Your Results ...',
-              description: 'This section will appear after you begin processing your audio. Let\'s explore some of its key components ...',
+              title: 'Upload Your File for Vinylifacation',
+              description: 'Click to browse and add your audio file to import, or drag and drop your input file into this area',
+              side: 'right',
+              align: 'center'
+            }
+          }
+        ]
+      },
+      'vinyl-effects': {
+        steps: [
+          {
+            element: '#presetSelector',
+            popover: {
+              title: 'Choosing a Vinylfy preset...',
+              description: 'Vinylfy comes with presets to make vinylification easy. Choose a preset that matches your taste. The default value is AJW Recommended from our own Vinylfy vinyl enthusiast!',
+              side: 'right',
+              align: 'center'
+            }
+          },
+          {
+            element: '#formatSelector',
+            popover: {
+              title: 'Choose your desired output format.',
+              description: 'Vinylfy supports multiple output formats to suit your individual needs. Choose the output format you prefer. The default is MP3 for maximum compatability.',
+              side: 'start',
+              align: 'bottom'
+            }
+          },
+          {
+            element: '#customControls',
+            popover: {
+              title: 'Customizing your vinylification...',
+              description: 'Vinylfy makes it easy to customize your audio to your own individual tastes. Start with one of our presets, and adjust the sound to your taste.',
               side: 'top',
               align: 'center'
             }
           },
           {
-            element: '#processingStatus',
+            element: '#frequencyResponse',
             popover: {
-              title: 'Watch Vinylfy Do Its Magic!',
-              description: 'Watch the status message change as we analyze your audio, apply vinyl effects, and finalize your track.',
+              title: 'RIAA Curve On/Off',
+              description: 'Toggle this switch to apply or bypass the RIAA equalization curve. This function is critical for correctly giving the sound vinyl records.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#surfaceNoise',
+            popover: {
+              title: 'Adding Surface Noise',
+              description: 'Toggle this switch to activate digital surface noise. This feature attempts to add clicks and crackle from vinyl playback, which are caused by dust and scratches on the record surface.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#noiseIntensity',
+            popover: {
+              title: 'Surface Noise Intensity',
+              description: 'Use this slider to adjust the strength of the clicker algorithm. Adjusting the intensity controls how aggressively the filter attempts to add surface noise.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#popIntensity',
+            popover: {
+              title: 'Pop Intensity',
+              description: 'Use this slider to adjust the intensity of the algorithm to add pops often caused by dust on the vinyl record.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#harmonicDistortion',
+            popover: {
+              title: 'Harmonic Distortion (Color/Warmth)',
+              description: 'Toggle this switch to enable or bypass the deliberate introduction of harmonic distortion (sometimes called "saturation"). This is an effect used to simulate the sound of analog gear, adding a subjective sense of "warmth," "color," or "grit" to the sound.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#distortionAmount',
+            popover: {
+              title: 'Harmonic Distortion Amount',
+              description: 'Use this slider to adjust the intensity of the added harmonic distortion (saturation). This controls the degree of analog "color" or "warmth" applied to the audio signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#stereoReduction',
+            popover: {
+              title: 'Stereo Reduction (Mono Sum)',
+              description: 'Toggle this switch to reduce the stereo width of the audio signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#stereoWidth',
+            popover: {
+              title: 'Stereo Width / Mono Blend Slider',
+              description: 'Use this slider to adjust the width of the stereo field, ranging from the original full stereo image to a completely summed mono signal. This allows you to selectively reduce the stereo separation without going straight to pure mono.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#wowFlutter',
+            popover: {
+              title: 'Wow & Flutter',
+              description: 'Toggle this switch to enable or bypass the Wow & Flutter effect. This intentionally introduces subtle, periodic speed variations that mimic inconsistencies found in older analog playback systems (like turntables with unstable motors)',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#wowFlutterIntensity',
+            popover: {
+              title: 'Wow & Flutter Intensity',
+              description: 'Use this slider to adjust the degree of speed variation and pitch instability applied to the audio signal. This controls how aggressively the analog "age" or "drift" is introduced into the sound.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#processBtn',
+            popover: {
+              title: 'Process Audio Button',
+              description: 'Click here to process your uploaded audio file with Vinylfy. Vinylfy will apply its algorithm based on the settings above.',
+              side: 'top',
+              align: 'center'
+            }
+          }
+        ]
+      },
+      results: {
+        steps: [
+          {
+            element: '#resultsSection',
+            popover: {
+              title: 'Results Section',
+              description: 'After clicking the Process Audio button above, this section will appear where you can preview, download, or discard the finished file. You also can manage the metadata for the processed file before downloading (MP3, AAC, and FLAC outputs only).',
               side: 'left',
               align: 'center'
             }
           },
           {
-            element: '.progress-bar-container',
+            element: '#resultFileName',
             popover: {
-              title: 'Vinylifcation Indicator',
-              description: 'The progress bar shows how far along the needle is Vinylfying your audio. Vinylfication typically takes 10-30 seconds depending on file size.',
-              side: 'bottom',
+              title: 'Output File Name',
+              description: 'This shows the filename that will be outputted upon download. All downloads from Vinylfy will append _vinylfy to the file name.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#resultFileSize',
+            popover: {
+              title: 'Output File Size',
+              description: 'This area shows the size of the processed file if you choose to download it. Ensure your downloads folder has enough space to store this file.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#resultPreset',
+            popover: {
+              title: 'Preset Applied',
+              description: 'This shows the preset applied to the outputted file.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#resultFormat',
+            popover: {
+              title: 'Output File Format',
+              description: 'This shows the outputted file format chosen above. Ensure you have the appropriate software to play this file type before downloading.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#expiresIn',
+            popover: {
+              title: 'File Expiration',
+              description: 'The time shown here represents the amount of time before the processed file is removed from the server, as set by your administrator. You will need to make sure you download the file prior to this time.',
+              side: 'left',
               align: 'center'
             }
           },
           {
             element: '#previewBtn',
             popover: {
-              title: 'Previewing your Vinylfied audio',
-              description: 'Click here to preview you new audio track with vinylification completed. You can play, pause, and move forward or backwards through your track.',
-              side: 'left',
+              title: 'Preview Button',
+              description: 'Press this button to prview your vinylfied audio before downloading.',
+              side: 'bottom',
               align: 'center'
             }
           },
-          {
+          {     
             element: '#metadataBtn',
             popover: {
-              title: 'Don\'t have any metadata, or want to change it? No problem!',
-              description: 'Metadata maangement is easy with Vinylfy! Click here to review your file\'s metadata, you can keep it as it is, or add your own metadata including album artwork! Metadata management is only available with AAC, MP3, and FLAC output formats.',
+              title: 'Metadata Button',
+              description: 'Press this button to view, edit, or delete the metadata tags associated with the processed file. Vinylfy will populate any avaialble metadata from the source file by default.',
               side: 'bottom',
               align: 'center'
             }
@@ -1999,8 +1993,8 @@ class VinylApp {
           {
             element: '#downloadBtn',
             popover: {
-              title: 'Saving your Vinylfied audio',
-              description: 'Click here to download your new vinylfied audio.',
+              title: 'Download Button',
+              description: 'Press this button to download your Vinylfied audio file.',
               side: 'bottom',
               align: 'center'
             }
@@ -2008,24 +2002,152 @@ class VinylApp {
           {
             element: '#discardBtn',
             popover: {
-              title: 'Looking for a Remix?',
-              description: 'Need to remix your track? Vinylfy has you covered. Press the discard buton to start over again until you get your favorite vinyl sound.',
-              side: 'right',
+              title: 'Discard Button',
+              description: 'Press this button to discard your Vinylfied audio file. This will delete the file from the server, and allow you to start over. You will need to reupload the same file, or you can select a new file.',
+              side: 'bottom',
               align: 'center'
-
             }
           }
-        ],
-        onDestroyStarted: () => {
-          // Mark tour as shown
-          storage.set(PROCESSING_TOUR_KEY, true);
-          driverObj.destroy();
-        }
-      });
+        ]
+      },
+      metadata: {
+        steps: [
+          {
+            element: '#metadataModal',
+            popover: {
+              title: 'Metadata Management',
+              description: 'In this screen, you can view, edit, or delete any metadata for your file. Vinylfy will automatically include any existing metadata from your uploaded file by default.',
+              side: 'top',
+              align: 'start'
+            }
+          },
+          {
+            element: '#editMetadataBtn',
+            popover: {
+              title: 'Edit Your Metadata',
+              description: 'Press this button to enter into edit mode, where you can edit your file\'s metadata. All of these fields are optional, however, filling in as much metadata as possible can help software such as Apple Music properly organize and show the properties of the song, and allow it to be indexable for features such as smart playlists, searches, etc.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaTitle',
+            popover: {
+              title: 'Title',
+              description: 'This is the song title.',
+              side: 'left',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaArtist',
+            popover: {
+              title: 'Artist',
+              description: 'This is the artist for the song.',
+              side: 'right',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaAlbum',
+            popover: {
+              title: 'Album',
+              description: 'This is the album for the song.',
+              side: 'left',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaYear',
+            popover: {
+              title: 'Year',
+              description: 'This is the year the song was released.',
+              side: 'right',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaGenre',
+            popover: {
+              title: 'Genre',
+              description: 'This is the genre for the song.',
+              side: 'left',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaTrack',
+            popover: {
+              title: 'Track Number',
+              description: 'This is the track number of the song on the album.',
+              side: 'right',
+              align: 'center'
+            }
+          },
+          {
+            element: '#metaComment',
+            popover: {
+              title: 'Comments',
+              description: 'This is where any comments are shown, or can be added.',
+              side: 'bottom',
+              align: 'center'
+            }
+          }
+        ]
+      }
+    };
+  }
 
-      console.log('🎬 Starting processing tour...');
-      driverObj.drive();
-    }, 600); // Delay to ensure progress bar is rendered
+  /**
+   * Start a contextual tour
+   * @param {string} tourName - Name of the tour to start
+   */
+  startTour(tourName) {
+    // Check if Driver.js is loaded
+    if (typeof window.driver === 'undefined' ||
+        typeof window.driver.js === 'undefined' ||
+        typeof window.driver.js.driver === 'undefined') {
+      console.warn('Driver.js not loaded');
+      showToast('Tour functionality not available', 'error');
+      return;
+    }
+
+    // Get tour definition
+    const tours = this.getTourDefinitions();
+    const tourDef = tours[tourName];
+
+    if (!tourDef) {
+      console.warn(`Tour '${tourName}' not found`);
+      return;
+    }
+
+    // Create and start the driver
+    const driverObj = window.driver.js.driver({
+      sanitize: false,
+      showProgress: true,
+      showButtons: ['next', 'previous', 'close'],
+      steps: tourDef.steps,
+      onDestroyStarted: () => {
+        driverObj.destroy();
+      }
+    });
+
+    driverObj.drive();
+  }
+
+  /**
+   * Setup help button event listeners
+   */
+  setupHelpButtons() {
+    // Get all help buttons
+    const helpButtons = document.querySelectorAll('.help-btn[data-tour]');
+
+    helpButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tourName = button.getAttribute('data-tour');
+        this.startTour(tourName);
+      });
+    });
   }
 
   /**
@@ -2079,30 +2201,53 @@ class VinylApp {
   updateCustomControlValues() {
     document.getElementById('frequencyResponse').checked = this.customSettings.frequency_response;
 
+    const noiseIntensity = document.getElementById('noiseIntensity');
+    const popIntensity = document.getElementById('popIntensity');
+    const wowFlutterIntensity = document.getElementById('wowFlutterIntensity');
+    const distortionAmount = document.getElementById('distortionAmount');
+    const stereoWidth = document.getElementById('stereoWidth');
+
     document.getElementById('surfaceNoise').checked = this.customSettings.surface_noise;
-    document.getElementById('noiseIntensity').value = this.customSettings.noise_intensity;
+    noiseIntensity.value = this.customSettings.noise_intensity;
     document.getElementById('noiseIntensityValue').textContent = this.customSettings.noise_intensity.toFixed(3);
-    document.getElementById('popIntensity').value = this.customSettings.pop_intensity;
+    // Update ARIA attributes
+    noiseIntensity.setAttribute('aria-valuenow', this.customSettings.noise_intensity);
+    noiseIntensity.setAttribute('aria-valuetext', this.customSettings.noise_intensity.toFixed(3));
+
+    popIntensity.value = this.customSettings.pop_intensity;
     document.getElementById('popIntensityValue').textContent = this.customSettings.pop_intensity.toFixed(2);
+    // Update ARIA attributes
+    popIntensity.setAttribute('aria-valuenow', this.customSettings.pop_intensity);
+    popIntensity.setAttribute('aria-valuetext', this.customSettings.pop_intensity.toFixed(2));
+
     // Hide/show slider groups based on toggle state
     document.getElementById('noiseIntensityGroup').style.display = this.customSettings.surface_noise ? 'block' : 'none';
     document.getElementById('popIntensityGroup').style.display = this.customSettings.surface_noise ? 'block' : 'none';
 
     document.getElementById('wowFlutter').checked = this.customSettings.wow_flutter;
-    document.getElementById('wowFlutterIntensity').value = this.customSettings.wow_flutter_intensity;
+    wowFlutterIntensity.value = this.customSettings.wow_flutter_intensity;
     document.getElementById('wowFlutterValue').textContent = this.customSettings.wow_flutter_intensity.toFixed(4);
+    // Update ARIA attributes
+    wowFlutterIntensity.setAttribute('aria-valuenow', this.customSettings.wow_flutter_intensity);
+    wowFlutterIntensity.setAttribute('aria-valuetext', this.customSettings.wow_flutter_intensity.toFixed(4));
     // Hide/show slider group based on toggle state
     document.getElementById('wowFlutterIntensityGroup').style.display = this.customSettings.wow_flutter ? 'block' : 'none';
 
     document.getElementById('harmonicDistortion').checked = this.customSettings.harmonic_distortion;
-    document.getElementById('distortionAmount').value = this.customSettings.distortion_amount;
+    distortionAmount.value = this.customSettings.distortion_amount;
     document.getElementById('distortionValue').textContent = this.customSettings.distortion_amount.toFixed(2);
+    // Update ARIA attributes
+    distortionAmount.setAttribute('aria-valuenow', this.customSettings.distortion_amount);
+    distortionAmount.setAttribute('aria-valuetext', this.customSettings.distortion_amount.toFixed(2));
     // Hide/show slider group based on toggle state
     document.getElementById('distortionAmountGroup').style.display = this.customSettings.harmonic_distortion ? 'block' : 'none';
 
     document.getElementById('stereoReduction').checked = this.customSettings.stereo_reduction;
-    document.getElementById('stereoWidth').value = this.customSettings.stereo_width;
+    stereoWidth.value = this.customSettings.stereo_width;
     document.getElementById('stereoWidthValue').textContent = this.customSettings.stereo_width.toFixed(2);
+    // Update ARIA attributes
+    stereoWidth.setAttribute('aria-valuenow', this.customSettings.stereo_width);
+    stereoWidth.setAttribute('aria-valuetext', this.customSettings.stereo_width.toFixed(2));
     // Hide/show slider group based on toggle state
     document.getElementById('stereoWidthGroup').style.display = this.customSettings.stereo_reduction ? 'block' : 'none';
   }

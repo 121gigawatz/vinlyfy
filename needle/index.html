@@ -24,14 +24,14 @@
   <title>Vinylfy</title>
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="/css/variables.css?v=beta2.4.3">
-  <link rel="stylesheet" href="/css/base.css?v=beta2.4.3">
-  <link rel="stylesheet" href="/css/components.css?v=beta2.4.3">
-  <link rel="stylesheet" href="/css/responsive.css?v=beta2.4.3">
+  <link rel="stylesheet" href="/css/variables.css?v=beta3">
+  <link rel="stylesheet" href="/css/base.css?v=beta3">
+  <link rel="stylesheet" href="/css/components.css?v=beta3">
+  <link rel="stylesheet" href="/css/responsive.css?v=beta3">
 
   <!-- Driver.js for product tours -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css">
-  <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.iife.js"></script>
+  <link rel="stylesheet" href="/css/vendor/driver.css?v=beta3">
+  <script src="/js/vendor/driver.js?v=beta3"></script>
 </head>
 <body>
   <!-- Skip Navigation -->
@@ -78,7 +78,6 @@
     <!-- Hero Section -->
     <section class="hero animate-fadeIn">
       <div class="hero-content">
-        <img id="turntableIcon" src="/assets/icons/turntable.png" alt="Record player turntable" style="margin: 0 auto var(--space-xs); width: 80px; height: 80px; display: block;">
         <h1 class="hero-title">Give Your Digital Music That Vinyl Sound</h1>
         <p class="hero-subtitle">Transform digital audio into warm, nostalgic vinyl records</p>
         <div class="hero-features">
@@ -94,12 +93,17 @@
     <section class="section animate-slideUp">
       <div class="card card-glow gradient-border">
         <div class="card-header">
-          <div style="display: flex; align-items: center; gap: var(--space-xs);">
-            <span class="step-indicator">1</span>
-            <div>
-              <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
-              <p class="card-subtitle">Select an audio file to vinylfy</p>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: var(--space-xs);">
+              <span class="step-indicator">1</span>
+              <div>
+                <h2 class="card-title" style="margin-bottom: var(--space-xs);">Upload Your Audio</h2>
+                <p class="card-subtitle">Select an audio file to vinylfy</p>
+              </div>
             </div>
+            <button class="help-btn" data-tour="upload" title="Learn about uploading audio files" aria-label="Help: Learn about uploading audio files">
+              ?
+            </button>
           </div>
         </div>
 
@@ -142,7 +146,7 @@
                 <p class="card-subtitle">Select a preset or customize your own</p>
               </div>
             </div>
-            <button id="howItWorksBtn" class="btn btn-ghost btn-sm" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; padding: 0; border-radius: 50%; border: 2px solid var(--color-info); color: var(--color-info); font-size: var(--font-size-md); display: flex; align-items: center; justify-content: center; cursor: pointer;" title="How does Vinylfy work?" aria-label="How it works">
+            <button class="help-btn" data-tour="vinyl-effects" title="Learn about vinyl effects and settings" aria-label="Help: Learn about vinyl effects and settings">
               ?
             </button>
           </div>
@@ -213,6 +217,11 @@
                     max="0.1"
                     step="0.001"
                     value="0.02"
+                    aria-label="Noise intensity level"
+                    aria-valuemin="0"
+                    aria-valuemax="0.1"
+                    aria-valuenow="0.02"
+                    aria-valuetext="0.020"
                   >
                 </div>
 
@@ -229,6 +238,11 @@
                     max="1.0"
                     step="0.05"
                     value="0.6"
+                    aria-label="Pop and crackle intensity level"
+                    aria-valuemin="0"
+                    aria-valuemax="1.0"
+                    aria-valuenow="0.6"
+                    aria-valuetext="0.60"
                   >
                 </div>
 
@@ -254,6 +268,11 @@
                     max="0.01"
                     step="0.0001"
                     value="0.001"
+                    aria-label="Wow and flutter pitch variation intensity"
+                    aria-valuemin="0"
+                    aria-valuemax="0.01"
+                    aria-valuenow="0.001"
+                    aria-valuetext="0.0010"
                   >
                 </div>
               </div>
@@ -282,6 +301,11 @@
                     max="1"
                     step="0.01"
                     value="0.15"
+                    aria-label="Harmonic distortion amount for analog warmth"
+                    aria-valuemin="0"
+                    aria-valuemax="1"
+                    aria-valuenow="0.15"
+                    aria-valuetext="0.15"
                   >
                 </div>
 
@@ -307,6 +331,11 @@
                     max="1"
                     step="0.01"
                     value="0.7"
+                    aria-label="Stereo field width and separation"
+                    aria-valuemin="0"
+                    aria-valuemax="1"
+                    aria-valuenow="0.7"
+                    aria-valuetext="0.70"
                   >
                 </div>
               </div>
@@ -344,12 +373,17 @@
     <section id="resultsSection" class="section hidden animate-slideUp">
       <div class="card card-elevated card-glow gradient-border">
         <div class="card-header">
-          <div style="display: flex; align-items: center; gap: var(--space-xs);">
-            <span class="step-indicator">3</span>
-            <div>
-              <h2 class="card-title" style="margin-bottom: var(--space-xs);">Preview & Download</h2>
-              <p class="card-subtitle">Your vinylified audio is ready! 🎉</p>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: var(--space-xs);">
+              <span class="step-indicator">3</span>
+              <div>
+                <h2 class="card-title" style="margin-bottom: var(--space-xs);">Preview & Download</h2>
+                <p class="card-subtitle">Your vinylified audio is ready! 🎉</p>
+              </div>
             </div>
+            <button class="help-btn" data-tour="results" title="Learn about previewing and downloading" aria-label="Help: Learn about previewing and downloading">
+              ?
+            </button>
           </div>
         </div>
         
@@ -410,7 +444,7 @@
         Vinylfy
       </p> 
       <p id="appVersion" style="font-size: var(--font-size-sm); color: var(--color-primary); font-weight: var(--font-weight-light); margin-bottom: var(--space-sm);">
-        Version: v1.0.0 Beta 2.4.3</p>
+        Version: v1.0.0 Beta 3</p>
       <p class="text-muted" style="font-size: var(--font-size-sm); margin-bottom: var(--space-xs);">
         Transform digital audio into warm vinyl records
       </p>
@@ -467,95 +501,18 @@
     </div>
   </div>
 
-  <!-- How It Works Modal -->
-  <div id="howItWorksModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="howItWorksModalTitle">
-    <div class="modal-overlay" aria-hidden="true"></div>
-    <div class="modal-content" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 style="color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: var(--space-xs);">
-          <span aria-hidden="true">ℹ️</span>
-          <span>How It Works</span>
-        </h3>
-      </div>
-      <div class="modal-body">
-        <p style="margin-bottom: var(--space-md); color: var(--color-text-primary);">
-          Vinylfy simulates the authentic sound of vinyl records by applying the following audio effects:
-        </p>
-
-        <div style="display: grid; gap: var(--space-md);">
-          <!-- Surface Noise -->
-          <div style="display: flex; gap: var(--space-sm); align-items: start;">
-            <span style="font-size: var(--font-size-xl);"></span>
-            <div>
-              <strong style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Surface Noise</strong>
-              <p style="margin: var(--space-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Adds the characteristic crackle and pops found on vinyl records. The higher the intensity setting, the more pronounced the noise.
-              </p>
-            </div>
-          </div>
-
-          <!-- Frequency Response -->
-          <div style="display: flex; gap: var(--space-sm); align-items: start;">
-            <span style="font-size: var(--font-size-xl);"></span>
-            <div>
-              <strong style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Frequency Response</strong>
-              <p style="margin: var(--space-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Applies the RIAA equalization curve that shapes vinyl's unique tonal character.
-              </p>
-            </div>
-          </div>
-
-          <!-- Wow & Flutter -->
-          <div style="display: flex; gap: var(--space-sm); align-items: start;">
-            <span style="font-size: var(--font-size-xl);"></span>
-            <div>
-              <strong style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Wow & Flutter</strong>
-              <p style="margin: var(--space-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Subtle pitch variations caused by turntable motor speed inconsistencies.
-              </p>
-            </div>
-          </div>
-
-          <!-- Harmonic Distortion -->
-          <div style="display: flex; gap: var(--space-sm); align-items: start;">
-            <span style="font-size: var(--font-size-xl);"></span>
-            <div>
-              <strong style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Harmonic Distortion</strong>
-              <p style="margin: var(--space-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Warmth and richness from analog playback imperfections not found in digital audio.
-              </p>
-            </div>
-          </div>
-
-          <!-- Stereo Reduction -->
-          <div style="display: flex; gap: var(--space-sm); align-items: start;">
-            <span style="font-size: var(--font-size-xl);"></span>
-            <div>
-              <strong style="color: var(--color-text-primary); font-size: var(--font-size-sm);">Stereo Reduction</strong>
-              <p style="margin: var(--space-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary);">
-                Narrows the stereo field to match vinyl's physical limitations of stereo separation.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end;" aria-label="Close How It Works">
-        <button id="closeHowItWorksModal" class="btn btn-primary">
-          I'm Ready to Vinylfy my Music
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Metadata Modal -->
-  <div id="metadataModal" class="modal hidden" role="dialog" aria-model="true" aria-labelledby="metadataModalTitle">
+<!-- Metadata Modal -->
+  <div id="metadataModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="metadataModalTitle">
     <div class="modal-overlay" aria-hidden="true"></div>
     <div class="modal-content" style="max-width: 700px;">
       <div class="modal-header">
-        <h3 style="color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: var(--space-xs);">
+        <h3 style="color: var(--color-primary); margin: 0; display: flex; align-items: center; gap: var(--space-xs); flex: 1;">
           <span aria-hidden="true">🏷️</span>
           <span>Audio Metadata</span>
         </h3>
+        <button class="help-btn" data-tour="metadata" title="Learn about metadata management" aria-label="Help: Learn about metadata management">
+          ?
+        </button>
       </div>
       <div class="modal-body">
         <!-- Metadata Notice -->
@@ -649,6 +606,6 @@
   </div>
 
   <!-- Scripts -->
-  <script type="module" src="/js/app.js?v=beta2.4.3"></script>
+  <script type="module" src="/js/app.js?v=beta3"></script>
 </body>
 </html>

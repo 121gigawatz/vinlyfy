@@ -24,10 +24,10 @@ export class AudioPlayer {
     this.container.innerHTML = `
       <div class="audio-player" id="audioPlayerContainer">
         <div class="audio-controls">
-          <button class="audio-play-btn" id="playBtn" aria-label="Play">
+          <button class="audio-play-btn" id="playBtn" aria-label="Play audio" aria-pressed="false">
             ▶
           </button>
-          <div class="audio-timeline" id="timeline">
+          <div class="audio-timeline" id="timeline" role="slider" aria-label="Audio timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0:00 of 0:00" tabindex="0">
             <div class="audio-progress" id="progress"></div>
           </div>
         </div>
@@ -57,7 +57,36 @@ export class AudioPlayer {
     // Timeline click to seek
     this.timeline.addEventListener('click', (e) => this.seek(e));
 
-    // Keyboard controls
+    // Keyboard controls for timeline navigation
+    this.timeline.addEventListener('keydown', (e) => {
+      if (!this.audio || !this.duration) return;
+
+      const step = 5; // 5% increments
+      let newPercent = parseFloat(this.timeline.getAttribute('aria-valuenow') || 0);
+
+      switch(e.key) {
+        case 'ArrowLeft':
+          newPercent = Math.max(0, newPercent - step);
+          break;
+        case 'ArrowRight':
+          newPercent = Math.min(100, newPercent + step);
+          break;
+        case 'Home':
+          newPercent = 0;
+          break;
+        case 'End':
+          newPercent = 100;
+          break;
+        default:
+          return; // Don't prevent default for other keys
+      }
+
+      e.preventDefault();
+      const newTime = (newPercent / 100) * this.duration;
+      this.audio.currentTime = newTime;
+    });
+
+    // Keyboard controls for global play/pause
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && this.audio && e.target.tagName !== 'INPUT') {
         e.preventDefault();
@@ -148,16 +177,32 @@ export class AudioPlayer {
     if (!this.duration) return;
 
     const percent = (this.currentTime / this.duration) * 100;
+    const currentSeconds = Math.floor(this.currentTime);
+    const durationSeconds = Math.floor(this.duration);
+
     this.progress.style.width = `${percent}%`;
     this.currentTimeEl.textContent = formatTime(this.currentTime);
+
+    // Update timeline ARIA attributes for accessibility
+    this.timeline.setAttribute('aria-valuenow', percent);
+    this.timeline.setAttribute('aria-valuetext',
+      `${formatTime(currentSeconds)} of ${formatTime(durationSeconds)}`
+    );
   }
 
   /**
    * Update play button appearance
    */
   updatePlayButton() {
-    this.playBtn.textContent = this.isPlaying ? '⏸' : '▶';
-    this.playBtn.setAttribute('aria-label', this.isPlaying ? 'Pause' : 'Play');
+    if (this.isPlaying) {
+      this.playBtn.textContent = '⏸';
+      this.playBtn.setAttribute('aria-label', 'Pause audio');
+      this.playBtn.setAttribute('aria-pressed', 'true');
+    } else {
+      this.playBtn.textContent = '▶';
+      this.playBtn.setAttribute('aria-label', 'Play audio');
+      this.playBtn.setAttribute('aria-pressed', 'false');
+    }
   }
 
   /**

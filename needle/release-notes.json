@@ -7,7 +7,9 @@
     ],
     "bugfixes": [
       "We've cleaned up the UI spacing to make it more consistent across devices",
-      "Fixed some scratches in our cache reloading for the most up-to-date experience."
+      "Fixed some scratches in our cache reloading for the most up-to-date experience.",
+      "Vinylfy is now for everyone! We've added accessability features to support VoiceOver and screen readers.",
+      "Added a complete guided tour. Click on the ? link in each card to get a step-by-step walkthrough on how Vinylfy works."
     ]
   },
   "v1.0.0 Beta 2.4.3": {

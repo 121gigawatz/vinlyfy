@@ -46,6 +46,45 @@
 }
 
 /* ========================================
+   HELP BUTTONS
+   ======================================== */
+
+.help-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--color-info);
+  background: transparent;
+  color: var(--color-info);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.help-btn:hover {
+  background: var(--color-info);
+  color: var(--color-text-inverse);
+  transform: scale(1.1);
+}
+
+.help-btn:active {
+  transform: scale(0.95);
+}
+
+.help-btn:focus-visible {
+  outline: 3px solid var(--color-info);
+  outline-offset: 3px;
+}
+
+/* ========================================
    THEME TOGGLE
    ======================================== */
 
@@ -692,7 +731,7 @@
   background: var(--color-bg-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-lg) var(--space-md);
-  margin-bottom: calc(var(--space-lg) + var(--space-xs));
+  margin-bottom: 0.5rem;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
@@ -700,7 +739,7 @@
 }
 
 .section {
-  margin-bottom: calc(var(--space-lg) + var(--space-xs));
+  margin-bottom: 0.5rem;
 }
 
 .hero::before {
@@ -753,6 +792,30 @@
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
+}
+
+/* Turntable icon - adapt to dark mode */
+#turntableIcon {
+  transition: filter var(--transition-base), background-color var(--transition-base);
+  border-radius: var(--radius-md);
+  /* Light mode: transparent or light background */
+  background-color: transparent;
+}
+
+/* Dark mode: add background and invert colors */
+[data-theme="dark"] #turntableIcon {
+  /* Fill transparent areas with dark background matching hero card */
+  background-color: #2a2a2a;
+  /* Invert and adjust the turntable colors */
+  filter: invert(0.92) hue-rotate(180deg) brightness(0.88) !important;
+}
+
+/* For auto mode when dark is preferred */
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] #turntableIcon {
+    background-color: #2a2a2a;
+    filter: invert(0.92) hue-rotate(180deg) brightness(0.88) !important;
+  }
 }
 
 /* ========================================

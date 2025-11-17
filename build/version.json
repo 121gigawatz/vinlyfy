@@ -1,7 +1,7 @@
 {
-  "version": "v1.0.0 Beta 2.4.3",
-  "shortVersion": "beta2.4.3",
-  "dockerTag": "v1.0.0-beta-2.4.3",
-  "buildDate": "2025-11-14",
-  "description": "Fix service worker caching issues and add metadata.js to precache."
+  "version": "v1.0.0 Beta 3",
+  "shortVersion": "beta3",
+  "dockerTag": "v1.0.0-beta-3",
+  "buildDate": "2025-01-17",
+  "description": "Beta 3: Accessibility improvements, contextual tours, range slider ARIA attributes."
 }
