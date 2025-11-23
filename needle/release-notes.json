@@ -1,4 +1,24 @@
 {
+  "v1.0.0 Beta 4.1": {
+    "date": "2025-11-22",
+    "highlights": [
+      "Hotfix for missing presets in the dropdown menu.",
+      "Fixed version display issue.",
+      "Fixed 'Clear Cache' and release notes display."
+    ],
+    "bugfixes": [
+      "Presets not showing in dropdown.",
+      "UX not showing latest version.",
+      "Clear cache and show release notes not working."
+    ]
+  },
+  "v1.0.0 Beta 4": {
+    "date": "2025-11-22",
+    "highlights": [
+      "Vinylfy has added all new features!",
+      "Check out our new Vinylfy presets, guided tours, and so much more!"
+    ]
+  },
   "v1.0.0 Beta 3": {
     "date": "2025-11-17",
     "highlights": [

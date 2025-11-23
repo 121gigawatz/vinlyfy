@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 3';
+const APP_VERSION = 'v1.0.0 Beta 4.1';
 
-import api from './api.js?v=beta3';
-import AudioPlayer from './audio-player.js?v=beta3';
+import api from './api.js?v=beta4.1';
+import AudioPlayer from './audio-player.js?v=beta4.1';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,13 +16,13 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta3';
+} from './utils.js?v=beta4.1';
 import {
   extractMetadata,
   writeMetadata,
   getEmptyMetadata,
   supportsMetadataWriting
-} from './metadata.js?v=beta3';
+} from './metadata.js?v=beta4.1';
 
 class VinylApp {
   constructor() {
@@ -693,8 +693,14 @@ class VinylApp {
     // Define preset order
     const presetOrder = ['AJW Recommended', 'light', 'medium', 'heavy', 'vintage', 'custom'];
 
-    // Add presets in specified order
-    presetOrder.forEach(preset => {
+    // Get all available presets from API response
+    const availablePresets = Object.keys(this.presets);
+
+    // Create a Set for unique presets to avoid duplicates
+    const uniquePresets = new Set([...presetOrder, ...availablePresets]);
+
+    // Add presets
+    uniquePresets.forEach(preset => {
       if (this.presets[preset]) {
         const option = document.createElement('option');
         option.value = preset;

@@ -27,7 +27,6 @@ soundfile==0.12.1
 
 # DRM detection
 mutagen==1.47.0
-wmainfo-py==1.0.0
 
 # ==============
 # File Handling

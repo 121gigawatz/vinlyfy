@@ -55,7 +55,7 @@ help:
 # Update version strings across all files
 version:
 	@echo "Updating version strings..."
-	@python3 update-version.py
+	@python3 ../scripts/update_version.py
 	@echo ""
 	@echo "✅ Version update complete!"
 	@echo "   Review changes with: git diff"

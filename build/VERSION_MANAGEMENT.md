@@ -34,10 +34,7 @@ To update the version across the entire application:
    make version
 
    # Option 2: Using Python (cross-platform)
-   python3 build/update-version.py
-
-   # Option 3: Using Bash (Linux/Mac only)
-   ./build/update-version.sh
+   python3 scripts/update_version.py
    ```
 
 3. **Done!** All files are now updated with the new version.

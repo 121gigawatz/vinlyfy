@@ -1,7 +1,7 @@
 {
-  "version": "v1.0.0 Beta 4",
-  "shortVersion": "beta4",
-  "dockerTag": "v1.0.0-beta-4",
+  "version": "v1.0.0 Beta 4.1",
+  "shortVersion": "beta4.1",
+  "dockerTag": "v1.0.0-beta-4.1",
   "buildDate": "2025-11-22",
-  "description": "Beta 5: Vinylfy has added all new features! Check out our new Vinylfy presets, guided tours, and so much more!"
+  "description": "Beta 4.1: Hotfix for presets and version display."
 }

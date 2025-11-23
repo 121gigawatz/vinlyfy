@@ -44,6 +44,9 @@ COPY --from=python:3.11-slim /usr/local/bin /usr/local/bin
 # Copy build scripts and version file
 COPY build /app/build
 
+# Copy maintenance scripts
+COPY scripts /app/scripts
+
 # Copy backend application
 COPY table/app /app/table/app
 
@@ -52,7 +55,7 @@ COPY needle /app/needle
 
 # Run version update script to sync all version strings
 # (must run AFTER files are copied so it can update them)
-RUN python3 /app/build/update-version.py
+RUN python3 /app/scripts/update_version.py
 
 
 
