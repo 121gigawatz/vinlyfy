@@ -2002,11 +2002,11 @@ class VinylApp {
             }
           },
           {
-            element: '#customControls',
+            element: '#customSettingsHeader',
             popover: {
               title: 'Customizing your vinylification...',
               description: 'Vinylfy makes it easy to customize your audio to your own individual tastes. Start with one of our presets, and adjust the sound to your taste.',
-              side: 'top',
+              side: 'right',
               align: 'center'
             }
           },
@@ -2027,7 +2027,11 @@ class VinylApp {
             }
           },
           {
-            element: '#surfaceNoiseToggle',
+            element: '#surfaceNoise',
+            onHighlightStarted: (element) => {
+              const label = element.element.closest('.toggle');
+              if (label) element.element = label;
+            },
             popover: {
               title: 'Adding Surface Noise',
               description: 'Toggle this switch to activate digital surface noise. This feature attempts to add clicks and crackle from vinyl playback, which are caused by dust and scratches on the record surface.',
