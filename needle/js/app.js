@@ -1981,7 +1981,7 @@ class VinylApp {
             element: '#presetSelector',
             popover: {
               title: 'Choosing a Vinylfy preset...',
-              description: 'Vinylfy comes with presets to make vinylification easy. Choose a preset that matches your taste. The default value is AJW Recommended from our own Vinylfy vinyl enthusiast!',
+              description: 'Vinylfy comes with presets to make vinylification easy!<br><br>Choose a preset from the 1920s through modern day.<br><br>The default value is AJW Recommended from our own Vinylfy vinyl enthusiast!',
               side: 'right',
               align: 'center'
             }
@@ -1990,7 +1990,7 @@ class VinylApp {
             element: '#formatSelector',
             popover: {
               title: 'Choose your desired output format.',
-              description: 'Vinylfy supports multiple output formats to suit your individual needs. Choose the output format you prefer. The default is MP3 for maximum compatability.',
+              description: 'Vinylfy supports multiple output formats to suit your individual needs. Choose the output format you prefer.<br><br>The default is MP3 for maximum compatability.',
               side: 'start',
               align: 'bottom'
             }
@@ -2006,15 +2006,22 @@ class VinylApp {
           },
           {
             element: '#frequencyResponse',
+            onHighlightStarted: (element) => {
+              // Highlight the parent label instead of just the input
+              const label = element.element.closest('.toggle');
+              if (label) {
+                element.element = label;
+              }
+            },
             popover: {
               title: 'RIAA Curve On/Off',
-              description: 'Toggle this switch to apply or bypass the RIAA equalization curve. This function is critical for correctly giving the sound vinyl records.',
+              description: 'Toggle this switch to apply or bypass the RIAA equalization curve introduced in the 1950s.',
               side: 'top',
               align: 'center'
             }
           },
           {
-            element: '#surfaceNoise',
+            element: '#surfaceNoiseToggle',
             popover: {
               title: 'Adding Surface Noise',
               description: 'Toggle this switch to activate digital surface noise. This feature attempts to add clicks and crackle from vinyl playback, which are caused by dust and scratches on the record surface.',
@@ -2042,6 +2049,10 @@ class VinylApp {
           },
           {
             element: '#harmonicDistortion',
+            onHighlightStarted: (element) => {
+              const label = element.element.closest('.toggle');
+              if (label) element.element = label;
+            },
             popover: {
               title: 'Harmonic Distortion (Color/Warmth)',
               description: 'Toggle this switch to enable or bypass the deliberate introduction of harmonic distortion (sometimes called "saturation"). This is an effect used to simulate the sound of analog gear, adding a subjective sense of "warmth," "color," or "grit" to the sound.',
@@ -2050,34 +2061,11 @@ class VinylApp {
             }
           },
           {
-            element: '#distortionAmount',
-            popover: {
-              title: 'Harmonic Distortion Amount',
-              description: 'Use this slider to adjust the intensity of the added harmonic distortion (saturation). This controls the degree of analog "color" or "warmth" applied to the audio signal.',
-              side: 'top',
-              align: 'center'
-            }
-          },
-          {
-            element: '#stereoReduction',
-            popover: {
-              title: 'Stereo Reduction (Mono Sum)',
-              description: 'Toggle this switch to reduce the stereo width of the audio signal.',
-              side: 'top',
-              align: 'center'
-            }
-          },
-          {
-            element: '#stereoWidth',
-            popover: {
-              title: 'Stereo Width / Mono Blend Slider',
-              description: 'Use this slider to adjust the width of the stereo field, ranging from the original full stereo image to a completely summed mono signal. This allows you to selectively reduce the stereo separation without going straight to pure mono.',
-              side: 'top',
-              align: 'center'
-            }
-          },
-          {
             element: '#wowFlutter',
+            onHighlightStarted: (element) => {
+              const label = element.element.closest('.toggle');
+              if (label) element.element = label;
+            },
             popover: {
               title: 'Wow & Flutter',
               description: 'Toggle this switch to enable or bypass the Wow & Flutter effect. This intentionally introduces subtle, periodic speed variations that mimic inconsistencies found in older analog playback systems (like turntables with unstable motors)',
@@ -2099,6 +2087,108 @@ class VinylApp {
             popover: {
               title: 'Process Audio Button',
               description: 'Click here to process your uploaded audio file with Vinylfy. Vinylfy will apply its algorithm based on the settings above.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#distortionAmount',
+            popover: {
+              title: 'Harmonic Distortion Amount',
+              description: 'Use this slider to adjust the intensity of the added harmonic distortion (saturation). This controls the degree of analog "color" or "warmth" applied to the audio signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#stereoReduction',
+            onHighlightStarted: (element) => {
+              const label = element.element.closest('.toggle');
+              if (label) element.element = label;
+            },
+            popover: {
+              title: 'Stereo Reduction (Mono Sum)',
+              description: 'Toggle this switch to reduce the stereo width of the audio signal.<br><br>This is a useful feature for creating a more mono-like sound, which can be helpful for certain genres or when you want to create a more balanced mix.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#stereoWidth',
+            popover: {
+              title: 'Stereo Width / Mono Blend Slider',
+              description: 'Use this slider to adjust the width of the stereo field, ranging from the original full stereo image to a completely summed mono signal. This allows you to selectively reduce the stereo separation without going straight to pure mono.<br><br>A value of 0 will give a full stereo signal, while a value of 1 will give a pure mono signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#bass',
+            popover: {
+              title: 'Bass',
+              description: 'Use this slider to adjust the bass of the audio signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#mid',
+            popover: {
+              title: 'Mid',
+              description: 'Use this slider to adjust the midtones of the audio signal.<br><br>Midtones are the frequencies between the bass and treble, which is usually where vocals and most of the instruments are.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#treble',
+            popover: {
+              title: 'Treble',
+              description: 'Use this slider to adjust the treble of the audio signal.<br><br>Treble is the high frequency range of the audio signal, which is usually where most of the high pitched instruments are.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#hpfEnabled',
+            onHighlightStarted: (element) => {
+              const label = element.element.closest('.toggle');
+              if (label) element.element = label;
+            },
+            popover: {
+              title: 'High Pass Filter',
+              description: 'Toggle this switch to enable or bypass the high pass filter.<br><br>The high pass filter removes low frequency noise and rumble from the audio signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#hpfCutoff',
+            popover: {
+              title: 'High Pass Filter Cutoff',
+              description: 'Use this slider to adjust the cutoff frequency of the high pass filter.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#lpfEnabled',
+            onHighlightStarted: (element) => {
+              const label = element.element.closest('.toggle');
+              if (label) element.element = label;
+            },
+            popover: {
+              title: 'Low Pass Filter',
+              description: 'Toggle this switch to enable or bypass the low pass filter.<br><br>The low pass filter removes high frequency noise and hiss from the audio signal.',
+              side: 'top',
+              align: 'center'
+            }
+          },
+          {
+            element: '#lpfCutoff',
+            popover: {
+              title: 'Low Pass Filter Cutoff',
+              description: 'Use this slider to adjust the cutoff frequency of the low pass filter.',
               side: 'top',
               align: 'center'
             }
