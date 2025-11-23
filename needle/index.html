@@ -26,14 +26,14 @@
   <title>Vinylfy</title>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="/css/variables.css?v=beta4.1">
-  <link rel="stylesheet" href="/css/base.css?v=beta4.1">
-  <link rel="stylesheet" href="/css/components.css?v=beta4.1">
-  <link rel="stylesheet" href="/css/responsive.css?v=beta4.1">
+  <link rel="stylesheet" href="/css/variables.css?v=beta4.1.1">
+  <link rel="stylesheet" href="/css/base.css?v=beta4.1.1">
+  <link rel="stylesheet" href="/css/components.css?v=beta4.1.1">
+  <link rel="stylesheet" href="/css/responsive.css?v=beta4.1.1">
 
   <!-- Driver.js for product tours -->
-  <link rel="stylesheet" href="/css/vendor/driver.css?v=beta4.1">
-  <script src="/js/vendor/driver.js?v=beta4.1"></script>
+  <link rel="stylesheet" href="/css/vendor/driver.css?v=beta4.1.1">
+  <script src="/js/vendor/driver.js?v=beta4.1.1"></script>
 </head>
 
 <body>
@@ -214,7 +214,7 @@
               <div>
                 <!-- Frequency Response -->
                 <div class="form-group">
-                  <label class="toggle">
+                  <label class="toggle" id="frequencyResponseLabel">
                     <input type="checkbox" id="frequencyResponse" class="toggle-input" role="switch" aria-checked="true"
                       aria-label="Enable frequency reponse with RIAA curve" checked>
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -224,7 +224,7 @@
 
                 <!-- Surface Noise -->
                 <div class="form-group" id="surfaceNoiseToggle">
-                  <label class="toggle">
+                  <label class="toggle" id="surfaceNoiseLabel">
                     <input type="checkbox" id="surfaceNoise" class="toggle-input" role="switch" aria-checked="true"
                       aria-label="Enable surface noise with crackles and pops" checked>
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -255,7 +255,7 @@
 
                 <!-- Wow & Flutter -->
                 <div class="form-group">
-                  <label class="toggle">
+                  <label class="toggle" id="wowFlutterLabel">
                     <input type="checkbox" id="wowFlutter" class="toggle-input" role="switch" aria-checked="true"
                       aria-label="Enable wow and flutter pitch variations" checked>
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -275,7 +275,7 @@
 
                 <!-- Harmonic Distortion -->
                 <div class="form-group">
-                  <label class="toggle">
+                  <label class="toggle" id="harmonicDistortionLabel">
                     <input type="checkbox" id="harmonicDistortion" class="toggle-input" role="switch"
                       aria-checked="true" aria-label="Enable harmonic distortion for analog warmth" checked>
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -295,7 +295,7 @@
 
                 <!-- Stereo Reduction -->
                 <div class="form-group">
-                  <label class="toggle">
+                  <label class="toggle" id="stereoReductionLabel">
                     <input type="checkbox" id="stereoReduction" class="toggle-input" role="switch" aria-checked="true"
                       aria-label="Enable stereo reduction for limited separation" checked>
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -355,7 +355,7 @@
 
                 <!-- High-Pass Filter -->
                 <div class="form-group">
-                  <label class="toggle">
+                  <label class="toggle" id="hpfLabel">
                     <input type="checkbox" id="hpfEnabled" class="toggle-input" role="switch" aria-checked="false"
                       aria-label="Enable high-pass filter to remove low rumble">
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -375,7 +375,7 @@
 
                 <!-- Low-Pass Filter -->
                 <div class="form-group">
-                  <label class="toggle">
+                  <label class="toggle" id="lpfLabel">
                     <input type="checkbox" id="lpfEnabled" class="toggle-input" role="switch" aria-checked="false"
                       aria-label="Enable low-pass filter for vintage warmth">
                     <span class="toggle-switch" aria-hidden="true"></span>
@@ -512,7 +512,7 @@
       </p>
       <p id="appVersion"
         style="font-size: var(--font-size-sm); color: var(--color-primary); font-weight: var(--font-weight-light); margin-bottom: var(--space-sm);">
-        Version: v1.0.0 Beta 4.1</p>
+        Version: v1.0.0 Beta 4.1.1</p>
       <p class="text-muted" style="font-size: var(--font-size-sm); margin-bottom: var(--space-xs);">
         Transform digital audio into warm vinyl records
       </p>
@@ -689,7 +689,7 @@
   </div>
 
   <!-- Scripts -->
-  <script type="module" src="/js/app.js?v=beta4.1"></script>
+  <script type="module" src="/js/app.js?v=beta4.1.1"></script>
 </body>
 
 </html>

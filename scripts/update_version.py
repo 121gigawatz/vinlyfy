@@ -35,6 +35,14 @@ def update_app_js(version_data):
         content
     )
 
+    # Update currentVersion in clearOldCaches
+    # const currentVersion = 'beta4.1';
+    content = re.sub(
+        r"const currentVersion = '.*?';",
+        f"const currentVersion = '{short_ver}';",
+        content
+    )
+
     with open(APP_JS, 'w') as f:
         f.write(content)
     print(f"Updated {APP_JS}")

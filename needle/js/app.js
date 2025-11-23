@@ -3,10 +3,10 @@
  */
 
 // App Configuration
-const APP_VERSION = 'v1.0.0 Beta 4.1';
+const APP_VERSION = 'v1.0.0 Beta 4.1.1';
 
-import api from './api.js?v=beta4.1';
-import AudioPlayer from './audio-player.js?v=beta4.1';
+import api from './api.js?v=beta4.1.1';
+import AudioPlayer from './audio-player.js?v=beta4.1.1';
 import {
   formatFileSize,
   isValidAudioFile,
@@ -16,13 +16,13 @@ import {
   formatPresetName,
   parseErrorMessage,
   isPWAInstalled
-} from './utils.js?v=beta4.1';
+} from './utils.js?v=beta4.1.1';
 import {
   extractMetadata,
   writeMetadata,
   getEmptyMetadata,
   supportsMetadataWriting
-} from './metadata.js?v=beta4.1';
+} from './metadata.js?v=beta4.1.1';
 
 class VinylApp {
   constructor() {
@@ -393,7 +393,7 @@ class VinylApp {
    */
   async clearOldCaches() {
     try {
-      const currentVersion = 'beta3';
+      const currentVersion = 'beta4.1.1';
 
       // Clear browser caches
       if ('caches' in window) {
@@ -2011,14 +2011,7 @@ class VinylApp {
             }
           },
           {
-            element: '#frequencyResponse',
-            onHighlightStarted: (element) => {
-              // Highlight the parent label instead of just the input
-              const label = element.element.closest('.toggle');
-              if (label) {
-                element.element = label;
-              }
-            },
+            element: '#frequencyResponseLabel',
             popover: {
               title: 'RIAA Curve On/Off',
               description: 'Toggle this switch to apply or bypass the RIAA equalization curve introduced in the 1950s.',
@@ -2027,11 +2020,7 @@ class VinylApp {
             }
           },
           {
-            element: '#surfaceNoise',
-            onHighlightStarted: (element) => {
-              const label = element.element.closest('.toggle');
-              if (label) element.element = label;
-            },
+            element: '#surfaceNoiseLabel',
             popover: {
               title: 'Adding Surface Noise',
               description: 'Toggle this switch to activate digital surface noise. This feature attempts to add clicks and crackle from vinyl playback, which are caused by dust and scratches on the record surface.',
@@ -2058,11 +2047,7 @@ class VinylApp {
             }
           },
           {
-            element: '#harmonicDistortion',
-            onHighlightStarted: (element) => {
-              const label = element.element.closest('.toggle');
-              if (label) element.element = label;
-            },
+            element: '#harmonicDistortionLabel',
             popover: {
               title: 'Harmonic Distortion (Color/Warmth)',
               description: 'Toggle this switch to enable or bypass the deliberate introduction of harmonic distortion (sometimes called "saturation"). This is an effect used to simulate the sound of analog gear, adding a subjective sense of "warmth," "color," or "grit" to the sound.',
@@ -2071,11 +2056,7 @@ class VinylApp {
             }
           },
           {
-            element: '#wowFlutter',
-            onHighlightStarted: (element) => {
-              const label = element.element.closest('.toggle');
-              if (label) element.element = label;
-            },
+            element: '#wowFlutterLabel',
             popover: {
               title: 'Wow & Flutter',
               description: 'Toggle this switch to enable or bypass the Wow & Flutter effect. This intentionally introduces subtle, periodic speed variations that mimic inconsistencies found in older analog playback systems (like turntables with unstable motors)',
@@ -2111,11 +2092,7 @@ class VinylApp {
             }
           },
           {
-            element: '#stereoReduction',
-            onHighlightStarted: (element) => {
-              const label = element.element.closest('.toggle');
-              if (label) element.element = label;
-            },
+            element: '#stereoReductionLabel',
             popover: {
               title: 'Stereo Reduction (Mono Sum)',
               description: 'Toggle this switch to reduce the stereo width of the audio signal.<br><br>This is a useful feature for creating a more mono-like sound, which can be helpful for certain genres or when you want to create a more balanced mix.',
@@ -2160,11 +2137,7 @@ class VinylApp {
             }
           },
           {
-            element: '#hpfEnabled',
-            onHighlightStarted: (element) => {
-              const label = element.element.closest('.toggle');
-              if (label) element.element = label;
-            },
+            element: '#hpfLabel',
             popover: {
               title: 'High Pass Filter',
               description: 'Toggle this switch to enable or bypass the high pass filter.<br><br>The high pass filter removes low frequency noise and rumble from the audio signal.',
@@ -2182,11 +2155,7 @@ class VinylApp {
             }
           },
           {
-            element: '#lpfEnabled',
-            onHighlightStarted: (element) => {
-              const label = element.element.closest('.toggle');
-              if (label) element.element = label;
-            },
+            element: '#lpfLabel',
             popover: {
               title: 'Low Pass Filter',
               description: 'Toggle this switch to enable or bypass the low pass filter.<br><br>The low pass filter removes high frequency noise and hiss from the audio signal.',
