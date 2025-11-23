@@ -1,7 +1,7 @@
 {
-  "version": "v1.0.0 Beta 3",
-  "shortVersion": "beta3",
-  "dockerTag": "v1.0.0-beta-3",
-  "buildDate": "2025-01-17",
-  "description": "Beta 3: Accessibility improvements, contextual tours, range slider ARIA attributes."
+  "version": "v1.0.0 Beta 4",
+  "shortVersion": "beta4",
+  "dockerTag": "v1.0.0-beta-4",
+  "buildDate": "2025-11-22",
+  "description": "Beta 5: Vinylfy has added all new features! Check out our new Vinylfy presets, guided tours, and so much more!"
 }

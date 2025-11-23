@@ -126,6 +126,15 @@ class VinylAPI {
   }
 
   /**
+   * Check if audio file has DRM protection (quick check)
+   */
+  async checkDRM(file) {
+    const formData = new FormData();
+    formData.append('audio', file);
+    return this.postFormData('/check-drm', formData);
+  }
+
+  /**
    * Process audio file with vinyl effects
    * Returns file ID for preview/download
    */

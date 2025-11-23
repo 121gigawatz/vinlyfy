@@ -64,10 +64,10 @@ class VinylApp {
 
     // Check API health
     await this.checkAPIHealth();
-    
+
     // Load presets and formats
     await this.loadPresets();
-    
+
     // Setup UI
     this.setupFileUpload();
     this.setupPresetSelector();
@@ -535,7 +535,7 @@ class VinylApp {
     fileLabel.addEventListener('drop', (e) => {
       e.preventDefault();
       fileLabel.classList.remove('drag-over');
-      
+
       const file = e.dataTransfer.files[0];
       if (file) {
         this.handleFileSelect(file);
@@ -548,7 +548,7 @@ class VinylApp {
   /**
    * Handle file selection
    */
-  handleFileSelect(file) {
+  async handleFileSelect(file) {
     const fileName = document.getElementById('fileName');
     const fileSize = document.getElementById('fileSize');
     const fileInfo = document.getElementById('fileInfo');
@@ -568,9 +568,95 @@ class VinylApp {
     this.editedMetadata = null;
     this.uploadedArtwork = null;
 
+    // Quick DRM check
+    await this.checkFileDRM(file);
+
     document.getElementById('processBtn').disabled = false;
 
     showToast('File loaded successfully!', 'success');
+  }
+
+  /**
+   * Check if file has DRM protection (quick check on upload)
+   */
+  async checkFileDRM(file) {
+    try {
+      const result = await api.checkDRM(file);
+
+      if (result.has_drm) {
+        this.showDRMWarning(result.drm_type, result.filename);
+      } else {
+        this.hideDRMWarning();
+      }
+    } catch (error) {
+      console.error('DRM check failed:', error);
+      // Don't block on check failure - let deep check handle it
+    }
+  }
+
+  /**
+   * Show DRM warning banner
+   */
+  showDRMWarning(drmType, filename) {
+    const warningHtml = `
+      <div id="drmWarning" class="alert alert-warning" style="margin-top: var(--space-md);">
+        <strong>⚠️ DRM Protection Detected</strong><br>
+        This file appears to be protected by <strong>${drmType}</strong>.<br>
+        <span style="font-size: var(--font-size-sm);">
+          Processing will likely fail. Please use audio files you own (not from streaming subscriptions).
+        </span>
+      </div>
+    `;
+
+    // Insert warning after file info
+    const fileInfo = document.getElementById('fileInfo');
+    const existing = document.getElementById('drmWarning');
+    if (existing) existing.remove();
+
+    fileInfo.insertAdjacentHTML('afterend', warningHtml);
+  }
+
+  /**
+   * Hide DRM warning banner
+   */
+  hideDRMWarning() {
+    const warning = document.getElementById('drmWarning');
+    if (warning) warning.remove();
+  }
+
+  /**
+   * Show DRM error in processing indicator
+   */
+  showDRMError(message) {
+    const indicator = document.getElementById('processingIndicator');
+    indicator.innerHTML = `
+      <div class="card card-elevated text-center">
+        <div style="color: var(--color-danger); margin-bottom: var(--space-md);">
+          <span style="font-size: 48px;">🔒</span>
+        </div>
+        <h3 style="color: var(--color-danger); margin-bottom: var(--space-md);">
+          DRM-Protected File Detected
+        </h3>
+        <p style="margin-bottom: var(--space-md); color: var(--color-text-primary);">
+          This audio file is protected by Digital Rights Management (DRM) and cannot be processed.
+        </p>
+        <div class="alert alert-info" style="text-align: left;">
+          <strong>What is DRM?</strong><br>
+          DRM protects subscription-based music (Apple Music, Spotify, etc.) from being copied or modified.
+          <br><br>
+          <strong>Solution:</strong><br>
+          Please use audio files you own, such as:
+          <ul style="margin: var(--space-sm) 0 0 var(--space-md);">
+            <li>Files purchased from iTunes (not Apple Music subscription)</li>
+            <li>CDs ripped to your computer</li>
+            <li>Files from Bandcamp, Amazon Music purchases, etc.</li>
+          </ul>
+        </div>
+        <button class="btn btn-primary" onclick="location.reload()">
+          Try Another File
+        </button>
+      </div>
+    `;
   }
 
   /**
@@ -799,6 +885,94 @@ class VinylApp {
       const valueText = value.toFixed(2);
       stereoWidthValue.textContent = valueText;
       // Update ARIA attributes
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
+      this.switchToCustomPreset();
+    });
+
+    // Bass EQ
+    const bassSlider = document.getElementById('bass');
+    const bassValue = document.getElementById('bassValue');
+
+    bassSlider.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      this.customSettings.bass = value;
+      const valueText = `${value.toFixed(1)} dB`;
+      bassValue.textContent = valueText;
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
+      this.switchToCustomPreset();
+    });
+
+    // Mid EQ
+    const midSlider = document.getElementById('mid');
+    const midValue = document.getElementById('midValue');
+
+    midSlider.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      this.customSettings.mid = value;
+      const valueText = `${value.toFixed(1)} dB`;
+      midValue.textContent = valueText;
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
+      this.switchToCustomPreset();
+    });
+
+    // Treble EQ
+    const trebleSlider = document.getElementById('treble');
+    const trebleValue = document.getElementById('trebleValue');
+
+    trebleSlider.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      this.customSettings.treble = value;
+      const valueText = `${value.toFixed(1)} dB`;
+      trebleValue.textContent = valueText;
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
+      this.switchToCustomPreset();
+    });
+
+    // High-Pass Filter
+    const hpfToggle = document.getElementById('hpfEnabled');
+    const hpfCutoff = document.getElementById('hpfCutoff');
+    const hpfCutoffValue = document.getElementById('hpfCutoffValue');
+    const hpfCutoffGroup = document.getElementById('hpfCutoffGroup');
+
+    hpfToggle.addEventListener('change', (e) => {
+      this.customSettings.hpf_enabled = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
+      hpfCutoffGroup.style.display = e.target.checked ? 'block' : 'none';
+      this.switchToCustomPreset();
+    });
+
+    hpfCutoff.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      this.customSettings.hpf_cutoff = value;
+      const valueText = `${value} Hz`;
+      hpfCutoffValue.textContent = valueText;
+      e.target.setAttribute('aria-valuenow', value);
+      e.target.setAttribute('aria-valuetext', valueText);
+      this.switchToCustomPreset();
+    });
+
+    // Low-Pass Filter
+    const lpfToggle = document.getElementById('lpfEnabled');
+    const lpfCutoff = document.getElementById('lpfCutoff');
+    const lpfCutoffValue = document.getElementById('lpfCutoffValue');
+    const lpfCutoffGroup = document.getElementById('lpfCutoffGroup');
+
+    lpfToggle.addEventListener('change', (e) => {
+      this.customSettings.lpf_enabled = e.target.checked;
+      e.target.setAttribute('aria-checked', e.target.checked);
+      lpfCutoffGroup.style.display = e.target.checked ? 'block' : 'none';
+      this.switchToCustomPreset();
+    });
+
+    lpfCutoff.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      this.customSettings.lpf_cutoff = value;
+      const valueText = `${value} Hz`;
+      lpfCutoffValue.textContent = valueText;
       e.target.setAttribute('aria-valuenow', value);
       e.target.setAttribute('aria-valuetext', valueText);
       this.switchToCustomPreset();
@@ -1253,10 +1427,18 @@ class VinylApp {
       this.showResults(result);
 
       showToast('Processing complete! 🎵', 'success');
-      
+
     } catch (error) {
       console.error('Processing failed:', error);
-      showToast(`Processing failed: ${parseErrorMessage(error)}`, 'error', 5000);
+
+      // Check if it's a DRM error
+      const errorMsg = error.message || '';
+      if (errorMsg.includes('DRM') || errorMsg.includes('protected') || errorMsg.includes('drm_type')) {
+        showToast('❌ DRM-Protected File: This file cannot be processed. Please use audio files you own.', 'error', 8000);
+        this.showDRMError(errorMsg);
+      } else {
+        showToast(`Processing failed: ${parseErrorMessage(error)}`, 'error', 5000);
+      }
     } finally {
       // Reset button state
       processBtn.disabled = false;
@@ -1358,7 +1540,7 @@ class VinylApp {
     const previewUrl = api.getPreviewURL(fileId);
     this.audioPlayer.load(previewUrl);
     this.audioPlayer.show();
-    
+
     showToast('Loading preview...', 'info');
   }
 
@@ -1491,7 +1673,14 @@ class VinylApp {
       harmonic_distortion: true,
       distortion_amount: 0.15,
       stereo_reduction: true,
-      stereo_width: 0.7
+      stereo_width: 0.7,
+      bass: 0.0,
+      mid: 0.0,
+      treble: 0.0,
+      hpf_enabled: false,
+      hpf_cutoff: 30,
+      lpf_enabled: false,
+      lpf_cutoff: 15000
     };
   }
 
@@ -1981,7 +2170,7 @@ class VinylApp {
               align: 'center'
             }
           },
-          {     
+          {
             element: '#metadataBtn',
             popover: {
               title: 'Metadata Button',
@@ -2105,8 +2294,8 @@ class VinylApp {
   startTour(tourName) {
     // Check if Driver.js is loaded
     if (typeof window.driver === 'undefined' ||
-        typeof window.driver.js === 'undefined' ||
-        typeof window.driver.js.driver === 'undefined') {
+      typeof window.driver.js === 'undefined' ||
+      typeof window.driver.js.driver === 'undefined') {
       console.warn('Driver.js not loaded');
       showToast('Tour functionality not available', 'error');
       return;
@@ -2250,6 +2439,54 @@ class VinylApp {
     stereoWidth.setAttribute('aria-valuetext', this.customSettings.stereo_width.toFixed(2));
     // Hide/show slider group based on toggle state
     document.getElementById('stereoWidthGroup').style.display = this.customSettings.stereo_reduction ? 'block' : 'none';
+
+    // Bass EQ
+    const bassSlider = document.getElementById('bass');
+    bassSlider.value = this.customSettings.bass || 0;
+    const bassValueText = `${(this.customSettings.bass || 0).toFixed(1)} dB`;
+    document.getElementById('bassValue').textContent = bassValueText;
+    bassSlider.setAttribute('aria-valuenow', this.customSettings.bass || 0);
+    bassSlider.setAttribute('aria-valuetext', bassValueText);
+
+    // Mid EQ
+    const midSlider = document.getElementById('mid');
+    midSlider.value = this.customSettings.mid || 0;
+    const midValueText = `${(this.customSettings.mid || 0).toFixed(1)} dB`;
+    document.getElementById('midValue').textContent = midValueText;
+    midSlider.setAttribute('aria-valuenow', this.customSettings.mid || 0);
+    midSlider.setAttribute('aria-valuetext', midValueText);
+
+    // Treble EQ
+    const trebleSlider = document.getElementById('treble');
+    trebleSlider.value = this.customSettings.treble || 0;
+    const trebleValueText = `${(this.customSettings.treble || 0).toFixed(1)} dB`;
+    document.getElementById('trebleValue').textContent = trebleValueText;
+    trebleSlider.setAttribute('aria-valuenow', this.customSettings.treble || 0);
+    trebleSlider.setAttribute('aria-valuetext', trebleValueText);
+
+    // High-Pass Filter
+    const hpfToggle = document.getElementById('hpfEnabled');
+    const hpfCutoff = document.getElementById('hpfCutoff');
+    hpfToggle.checked = this.customSettings.hpf_enabled || false;
+    hpfToggle.setAttribute('aria-checked', this.customSettings.hpf_enabled || false);
+    hpfCutoff.value = this.customSettings.hpf_cutoff || 30;
+    const hpfValueText = `${this.customSettings.hpf_cutoff || 30} Hz`;
+    document.getElementById('hpfCutoffValue').textContent = hpfValueText;
+    hpfCutoff.setAttribute('aria-valuenow', this.customSettings.hpf_cutoff || 30);
+    hpfCutoff.setAttribute('aria-valuetext', hpfValueText);
+    document.getElementById('hpfCutoffGroup').style.display = (this.customSettings.hpf_enabled || false) ? 'block' : 'none';
+
+    // Low-Pass Filter
+    const lpfToggle = document.getElementById('lpfEnabled');
+    const lpfCutoff = document.getElementById('lpfCutoff');
+    lpfToggle.checked = this.customSettings.lpf_enabled || false;
+    lpfToggle.setAttribute('aria-checked', this.customSettings.lpf_enabled || false);
+    lpfCutoff.value = this.customSettings.lpf_cutoff || 15000;
+    const lpfValueText = `${this.customSettings.lpf_cutoff || 15000} Hz`;
+    document.getElementById('lpfCutoffValue').textContent = lpfValueText;
+    lpfCutoff.setAttribute('aria-valuenow', this.customSettings.lpf_cutoff || 15000);
+    lpfCutoff.setAttribute('aria-valuetext', lpfValueText);
+    document.getElementById('lpfCutoffGroup').style.display = (this.customSettings.lpf_enabled || false) ? 'block' : 'none';
   }
 
   /**
@@ -2274,7 +2511,7 @@ class VinylApp {
         }
       }
 
-      if(e.key === 'Escape') {
+      if (e.key === 'Escape') {
         modal.classList.add('hidden');
         this.resetMetadataEditMode();
       }
@@ -2285,7 +2522,7 @@ class VinylApp {
 }
 
 // Global diagnostic function for troubleshooting
-window.vinylDiagnostics = async function() {
+window.vinylDiagnostics = async function () {
   console.log('🔍 Running Vinylfy diagnostics...\n');
 
   const results = {
@@ -2409,7 +2646,7 @@ window.vinylDiagnostics = async function() {
 };
 
 // Global cache clearing function
-window.vinylClearCache = async function() {
+window.vinylClearCache = async function () {
   console.log('🧹 Clearing all Vinylfy caches and service workers...');
 
   try {

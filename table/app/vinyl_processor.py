@@ -11,6 +11,9 @@ import logging
 from typing import Tuple, Optional
 import io
 
+# Import DRM detection
+from .drm_detector import deep_drm_check, DRMProtectedError
+
 logger = logging.getLogger(__name__)
 
 # CORE AUDIO PROCESSING FOR APPLYING VINYL EFFECTS
@@ -29,20 +32,41 @@ class VinylProcessor:
             logger.info(f"Loaded audio: {audio_data.shape}, {sample_rate} Hz")
             return audio_data, sample_rate
         except Exception as e:
-            logger.warning(f"soundfile failed, trying pydub: {e}")
-            # Fallback to pydub for more format support
-            audio_segment = AudioSegment.from_file(filepath)
-            audio_segment = audio_segment.set_frame_rate(self.sample_rate)
+            error_msg = str(e)
+            logger.warning(f"soundfile failed: {error_msg}")
+            
+            # Check if this might be a DRM issue
+            has_drm, drm_type = deep_drm_check(filepath, error_msg)
+            if has_drm:
+                logger.error(f"DRM detected during audio loading: {drm_type}")
+                raise DRMProtectedError(
+                    f"Cannot process DRM-protected file. DRM type: {drm_type}"
+                )
+            
+            # Not DRM - try fallback to pydub for more format support
+            try:
+                audio_segment = AudioSegment.from_file(filepath)
+                audio_segment = audio_segment.set_frame_rate(self.sample_rate)
 
-            # Convert to numpy array
-            samples = np.array(audio_segment.get_array_of_samples(), dtype=np.float32)
-            samples = samples / 32768.0 # Normalize to -1.0 to 1.0
+                # Convert to numpy array
+                samples = np.array(audio_segment.get_array_of_samples(), dtype=np.float32)
+                samples = samples / 32768.0 # Normalize to -1.0 to 1.0
 
-            # Reshape for stereo
-            if audio_segment.channels == 2:
-                samples = samples.reshape((-1, 2))
+                # Reshape for stereo
+                if audio_segment.channels == 2:
+                    samples = samples.reshape((-1, 2))
 
-            return samples, audio_segment.frame_rate
+                return samples, audio_segment.frame_rate
+            except Exception as pydub_error:
+                # Check DRM again with pydub error
+                has_drm, drm_type = deep_drm_check(filepath, str(pydub_error))
+                if has_drm:
+                    logger.error(f"DRM detected during pydub loading: {drm_type}")
+                    raise DRMProtectedError(
+                        f"Cannot process DRM-protected file. DRM type: {drm_type}"
+                    )
+                # Not DRM - re-raise original error
+                raise pydub_error
 
     def add_surface_noise(self, audio: np.ndarray, intensity: float = 0.02, pop_intensity: float = 0.5) -> np.ndarray:
         """
@@ -164,6 +188,111 @@ class VinylProcessor:
 
         return np.column_stack([new_left, new_right])
 
+    # Apply 3-band parametric EQ (Bass, Mid, Treble)
+    def apply_eq(self, audio: np.ndarray, bass: float = 0.0, mid: float = 0.0, treble: float = 0.0) -> np.ndarray:
+        """
+        Apply 3-band parametric EQ to audio.
+        
+        Args:
+            audio: Input audio array
+            bass: Bass adjustment in dB (-5 to +5), centered at ~100 Hz
+            mid: Mid adjustment in dB (-5 to +5), centered at ~1000 Hz
+            treble: Treble adjustment in dB (-5 to +5), high shelf at ~8000 Hz
+        """
+        logger.debug(f"Applying EQ - Bass: {bass} dB, Mid: {mid} dB, Treble: {treble} dB")
+        
+        # Skip if all EQ values are 0
+        if bass == 0.0 and mid == 0.0 and treble == 0.0:
+            return audio
+        
+        nyquist = self.sample_rate / 2
+        result = audio.copy()
+        
+        # Bass - Peaking filter at 100 Hz
+        if bass != 0.0:
+            bass_freq = 100 / nyquist
+            bass_q = 0.7  # Wider bandwidth for bass
+            # Convert dB to linear gain
+            bass_gain = 10 ** (bass / 20.0)
+            
+            # Create peaking filter
+            b_bass, a_bass = signal.iirpeak(bass_freq, bass_q)
+            # Apply with gain
+            bass_filtered = signal.filtfilt(b_bass, a_bass, result, axis=0)
+            result = result + (bass_filtered - result) * (bass_gain - 1.0)
+        
+        # Mid - Peaking filter at 1000 Hz
+        if mid != 0.0:
+            mid_freq = 1000 / nyquist
+            mid_q = 1.0  # Standard Q for mids
+            mid_gain = 10 ** (mid / 20.0)
+            
+            b_mid, a_mid = signal.iirpeak(mid_freq, mid_q)
+            mid_filtered = signal.filtfilt(b_mid, a_mid, result, axis=0)
+            result = result + (mid_filtered - result) * (mid_gain - 1.0)
+        
+        # Treble - High shelf filter at 8000 Hz
+        if treble != 0.0:
+            treble_freq = 8000 / nyquist
+            treble_gain = 10 ** (treble / 20.0)
+            
+            # Simple high shelf using butterworth high-pass
+            b_treble, a_treble = signal.butter(2, treble_freq, 'high')
+            treble_filtered = signal.filtfilt(b_treble, a_treble, result, axis=0)
+            result = result + (treble_filtered - result) * (treble_gain - 1.0)
+        
+        return result
+
+    # Apply High-Pass Filter (removes frequencies below cutoff)
+    def apply_hpf(self, audio: np.ndarray, cutoff_hz: float = 30) -> np.ndarray:
+        """
+        Apply high-pass filter to remove low-frequency rumble.
+        
+        Args:
+            audio: Input audio array
+            cutoff_hz: Cutoff frequency in Hz (20-500 Hz typical range)
+        """
+        logger.debug(f"Applying HPF with cutoff: {cutoff_hz} Hz")
+        
+        nyquist = self.sample_rate / 2
+        cutoff_normalized = cutoff_hz / nyquist
+        
+        # Ensure cutoff is valid
+        if cutoff_normalized >= 1.0:
+            logger.warning(f"HPF cutoff {cutoff_hz} Hz is too high, skipping")
+            return audio
+        
+        # 2nd order Butterworth high-pass filter
+        b, a = signal.butter(2, cutoff_normalized, 'high')
+        filtered = signal.filtfilt(b, a, audio, axis=0)
+        
+        return filtered
+
+    # Apply Low-Pass Filter (removes frequencies above cutoff)
+    def apply_lpf(self, audio: np.ndarray, cutoff_hz: float = 15000) -> np.ndarray:
+        """
+        Apply low-pass filter to remove high-frequency content.
+        
+        Args:
+            audio: Input audio array
+            cutoff_hz: Cutoff frequency in Hz (5000-20000 Hz typical range)
+        """
+        logger.debug(f"Applying LPF with cutoff: {cutoff_hz} Hz")
+        
+        nyquist = self.sample_rate / 2
+        cutoff_normalized = cutoff_hz / nyquist
+        
+        # Ensure cutoff is valid
+        if cutoff_normalized >= 1.0:
+            logger.warning(f"LPF cutoff {cutoff_hz} Hz is too high, using nyquist")
+            cutoff_normalized = 0.99
+        
+        # 2nd order Butterworth low-pass filter
+        b, a = signal.butter(2, cutoff_normalized, 'low')
+        filtered = signal.filtfilt(b, a, audio, axis=0)
+        
+        return filtered
+
     # APPLY ALL EFFECTS FROM SETTINGS - RETURN PROCESSED AUDIO ARRAY
     def process(self, audio: np.ndarray, settings: dict) -> np.ndarray:
         logger.info(f"Processing audio with shape: {audio.shape}")
@@ -174,6 +303,22 @@ class VinylProcessor:
         # Normalize to -1 to 1 range if needed
         if audio.max() > 1.0 or audio.min() < -1.0:
             audio = audio / np.abs(audio).max()
+
+        # Apply filters first (HPF and LPF)
+        if settings.get('hpf_enabled', False):
+            cutoff = settings.get('hpf_cutoff', 30)
+            audio = self.apply_hpf(audio, cutoff)
+
+        if settings.get('lpf_enabled', False):
+            cutoff = settings.get('lpf_cutoff', 15000)
+            audio = self.apply_lpf(audio, cutoff)
+
+        # Apply 3-band EQ
+        bass = settings.get('bass', 0.0)
+        mid = settings.get('mid', 0.0)
+        treble = settings.get('treble', 0.0)
+        if bass != 0.0 or mid != 0.0 or treble != 0.0:
+            audio = self.apply_eq(audio, bass, mid, treble)
 
         # Apply effects in order
         if settings.get('frequency_response', True):

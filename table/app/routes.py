@@ -15,6 +15,7 @@ from .utils import (
     parse_boolean,
     sanitize_filename
 )
+from .drm_detector import quick_drm_check, DRMProtectedError
 from . import __version__
 
 logger = logging.getLogger(__name__)
@@ -74,6 +75,62 @@ def get_supported_formats():
         'input_formats': list(Config.ALLOWED_EXTENSIONS),
         'output_formats': sorted(list(Config.ALLOWED_OUTPUT_FORMATS))
     }), 200
+
+
+@api.route('/check-drm', methods=['POST'])
+def check_drm():
+    """
+    Quick DRM check endpoint for frontend validation.
+    Accepts file upload and returns DRM status without processing.
+    
+    Expected form data:
+        - audio: Audio file (required)
+    
+    Returns:
+        JSON with DRM status and type
+    """
+    temp_input_path = None
+    
+    try:
+        # Check if audio file is present
+        if 'audio' not in request.files:
+            return jsonify({'error': 'No audio file provided'}), 400
+        
+        audio_file = request.files['audio']
+        
+        if audio_file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        # Validate file extension
+        if not allowed_file(audio_file.filename, Config.ALLOWED_EXTENSIONS):
+            return jsonify({
+                'error': f'Unsupported file format. Allowed: {", ".join(Config.ALLOWED_EXTENSIONS)}'
+            }), 400
+        
+        # Create temporary input file
+        file_ext = audio_file.filename.rsplit('.', 1)[1].lower()
+        _, temp_input_path = create_temp_file(suffix=f'.{file_ext}')
+        audio_file.save(temp_input_path)
+        
+        # Quick DRM check
+        has_drm, drm_type = quick_drm_check(temp_input_path)
+        
+        logger.info(f"DRM check for {audio_file.filename}: has_drm={has_drm}, type={drm_type}")
+        
+        return jsonify({
+            'has_drm': has_drm,
+            'drm_type': drm_type,
+            'filename': audio_file.filename
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"DRM check error: {e}", exc_info=True)
+        return jsonify({'error': 'Failed to check file'}), 500
+    
+    finally:
+        # Cleanup temporary file
+        if temp_input_path:
+            cleanup_temp_file(temp_input_path)
 
 
 @api.route('/process', methods=['POST'])
@@ -166,6 +223,16 @@ def process_audio():
         _, temp_input_path = create_temp_file(suffix=f'.{file_ext}')
         audio_file.save(temp_input_path)
         
+        # Quick DRM check - reject DRM-protected files early
+        has_drm, drm_type = quick_drm_check(temp_input_path)
+        if has_drm:
+            logger.warning(f"DRM-protected file rejected: {audio_file.filename} (Type: {drm_type})")
+            return jsonify({
+                'error': 'DRM-protected file detected',
+                'drm_type': drm_type,
+                'message': 'This file appears to be protected by DRM. Please use audio files you own.'
+            }), 400
+        
         # Get input file info
         input_info = get_audio_info(temp_input_path)
         logger.info(f"Input file: {input_info}")
@@ -220,6 +287,13 @@ def process_audio():
             'download_url': f'/api/download/{file_id}',
             'expires_in_seconds': Config.PROCESSED_FILES_TTL_HOURS * 3600
         }), 200
+    
+    except DRMProtectedError as e:
+        logger.warning(f"DRM-protected file rejected during processing: {audio_file.filename}")
+        return jsonify({
+            'error': 'DRM-protected file detected',
+            'message': 'This file is protected by DRM and cannot be processed. Please use audio files you own.'
+        }), 400
     
     except RequestEntityTooLarge:
         return jsonify({
